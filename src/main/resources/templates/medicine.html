@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zxx" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Ayurvedic - Medical Template</title>
+
+    <link rel="shortcut icon" type="image/x-icon" href="assets/images/cropped-favicon-32x32.png"/>
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/css/style.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/css/plugin.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/css/dashboard.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/fonts/flaticon.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/css/icons.css" rel="stylesheet" type="text/css"/>
+
+    <link rel="stylesheet" href="assets/fonts/line-icons.css" type="text/css"/>
+    <link rel="stylesheet" href="common/font-awesome/css/font-awesome.min.css">
+</head>
+<body>
+
+<div id="preloader">
+    <div id="status"></div>
+</div>
+
+<div th:replace="common/common-bar::#header"></div>
+
+
+<section class="breadcrumb-wrap">
+    <div class="container">
+        <h2 class="cl-white mb-0">About Us</h2>
+    </div>
+    <div class="overlay"></div>
+</section>
+
+
+<section class="aboutus aboutus-3">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-5 col-md-12">
+                <div class="about-img position-relative">
+                    <img th:src="${medicine.imgPath}" class=""
+                         alt="" style="height: 300px;width: 100%"/>
+                </div>
+            </div>
+            <div class="col-lg-7 col-md-12 p-lg-4">
+                <div class="sc-title-one mb-3">
+                    <h4 class="cl-green" th:text="${medicine.medicinePrice}+'￥/盒'">Welcome To Best Medical & Health</h4>
+                    <h2 class="mb-3" th:text="${medicine.medicineName}">Get Best & Amazing Experice With Our Professional Doctors</h2>
+                    <h5>品牌方：[[${medicine.medicineBrand}]]</h5>
+                </div>
+                <div class="about-detail">
+                    <h4>适应症：</h4>
+                    <p th:text="${medicine.medicineEffect}">
+                    </p>
+                    <!--<ul class="d-flex flex-wrap">
+                        <li class="w-50"><i class="fas fa-angle-double-right cl-green"></i> Professional Doctors</li>
+                        <li class="w-50"><i class="fas fa-angle-double-right cl-green"></i>24/7 Online Support</li>
+                        <li class="w-50"><i class="fas fa-angle-double-right cl-green"></i>Digital Laboratory</li>
+                        <li class="w-50"><i class="fas fa-angle-double-right cl-green"></i>High Packages</li>
+                        <li class="w-50 border-lg-0"><i class="fas fa-angle-double-right cl-green"></i>Online Schedule
+                        </li>
+                        <li class="w-50 border-lg-0"><i class="fas fa-angle-double-right cl-green"></i>And More...</li>
+                    </ul>-->
+                </div>
+            </div>
+        </div>
+        <div class="w-process mt-5">
+            <div class="row">
+                <div class="col-lg-12 col-md-6">
+                        <div class="pcs-list p-4 border border-light-c bg-white">
+                            <i class="far fa-file-alt"></i>
+                            <h4>药的相互作用：</h4>
+                            <p class="cl-grey" th:text="${medicine.interaction}">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit
+                                tellus.</p>
+                        </div>
+                </div>
+            </div>
+            <div class="row" style="padding-top: 20px">
+                <div class="col-lg-12 col-md-6">
+                        <div class="pcs-list p-4 border border-light-c bg-white">
+                            <i class="far fa-file-alt"></i>
+                            <h4>禁忌：</h4>
+                            <p class="cl-grey" th:text="${medicine.taboo}">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit
+                                tellus.qweqwewqewqeqeqewqeqweqeqeqeqeqwewqe</p>
+                        </div>
+                </div>
+            </div>
+            <div class="row" style="padding-top: 20px">
+                <div class="col-lg-12 col-md-6">
+                        <div class="pcs-list p-4 border border-light-c bg-white">
+                            <i class="far fa-file-alt"></i>
+                            <h4>用法用量</h4>
+                            <p class="cl-grey" th:text="${medicine.usAge}">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit
+                                tellus.</p>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div th:replace="common/common-bar::#back"></div>
+
+<div th:replace="common/common-bar::#footer"></div>
+
+<div th:replace="common/common-bar::#search"></div>
+
+<div th:replace="common/common-bar::#back-to-top"></div>
+
+<script src="assets/js/jquery-3.5.1.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
+<script src="assets/js/plugin.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/custom-swiper.js"></script>
+<script src="assets/js/custom-nav.js"></script>
+<script src="common/utils/reg.js"></script>
+<script src="common/layer/layer.js"></script>
+<script src="common/custom.js"></script>
+<script src="assets/js/xtiper.min.js"></script>
+</body>
+</html>

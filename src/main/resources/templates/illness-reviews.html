@@ -1,0 +1,151 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zxx" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Ayurvedic - Medical Template</title>
+
+    <link rel="shortcut icon" type="image/x-icon" href="assets/images/cropped-favicon-32x32.png"/>
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/css/style.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/css/plugin.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/css/dashboard.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/fonts/flaticon.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/css/icons.css" rel="stylesheet" type="text/css"/>
+
+    <link rel="stylesheet" href="assets/fonts/line-icons.css" type="text/css"/>
+    <link rel="stylesheet" href="common/font-awesome/css/font-awesome.min.css">
+    <script async src='/cdn-cgi/challenge-platform/h/g/scripts/invisible.js'></script>
+</head>
+<body>
+
+<div id="preloader">
+    <div id="status"></div>
+</div>
+
+<div th:replace="common/common-bar::#header"></div>
+
+
+<div id="dashboard">
+    <div class="container">
+        <div class="dashboard-main">
+            <div class="row">
+                <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
+                    <div class="dashboard-sidebar">
+                        <div class="profile-sec">
+                            <div class="author-news mb-3">
+                                <div class="author-news-content text-center p-3">
+                                    <div class="author-thumb mt-0">
+                                        <img src="assets/images/illness.jpeg" alt="author"/>
+                                    </div>
+                                    <div class="author-content pt-2 p-0">
+                                        <h3 class="mb-1 white"><a href="#" class="white"
+                                                                  th:text="${illness.illnessName}">疾病的名字</a></h3>
+                                        <p class="detail" th:text="${illness.includeReason}"></p>
+                                        <!--                                        <p class="detail"><i class="fa fa-phone" th:text="${}"></i> +45 8547 9851</p>-->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-left: 20px;margin-right: 20px">
+                            <h3>一般症状：</h3>
+                            <p th:text="${illness.illnessSymptom}" style="text-indent:2em;">
+                                你想要的都会有的
+                            </p>
+                        </div>
+                        <div style="margin-left: 20px;margin-top: 30px;margin-bottom: 30px">
+                            <h3>特殊症状：</h3>
+                            <p th:text="${illness.specialSymptom}" style="text-indent:2em;">
+
+                            </p>
+                        </div>
+                        <a href="#" class="dashboard-responsive-nav-trigger"><i class="fa fa-reorder"></i> Dashboard
+                            Navigation</a>
+                        <div class="dashboard-nav">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-8 col-md-12 col-sm-12 col-xs-12">
+                    <div class="dashboard-content">
+                        <div class="dashboard-review single-comments">
+                            <div class="comments">
+                                <div style="margin-top: 30px;text-align: center"><h3>相关药物如下</h3></div>
+                                <div class="comment-box d-flex align-items-center justify-content-between"
+                                     th:each="me:${medicine}">
+                                    <div class="comment-image">
+                                        <a th:href="@{findMedicineOne(id=${me.id})}">
+                                            <img th:src="${me.imgPath}" alt="image"/>
+                                        </a>
+                                    </div>
+                                    <div class="comment-content" style="width: 800px;height: 150px">
+                                        <a th:href="@{findMedicineOne(id=${me.id})}">
+                                            <h5 class="m-0" th:text="${me.medicineName}">Helena</h5>
+                                        </a>
+                                        <p class="comment-date mb-2" th:text="${me.medicineBrand}+'牌'">April 25,
+                                            2019 at
+                                            10:46 am</p>
+                                        <span class="num-rating white"
+                                              th:text="${me.medicineType eq 0}?'西药':(${me.medicineType eq 1}?'中药':'中性药')">4.6/5</span>
+                                        <span class="comment-title"><i>"是药三分毒，切忌不要乱吃药！"</i></span>
+                                        <p class="comment mt-2" th:text="${me.medicineEffect}">
+                                            Take in the iconic skyline and visit the neighbourhood hangouts that
+                                            you've
+                                            only ever seen on TV. Take in the iconic skyline and visit
+                                            the neighbourhood.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="comment-box d-flex align-items-center justify-content-between"
+                                     th:if="${medicine eq null}">
+                                    <div style="text-align: center;width: 100%;height: 80%;padding-top: -50px">
+                                        <!--                                        <img src="assets/images/bg.png" alt="image" style="width: 100%;height: 80%"/>-->
+                                        <h3>暂无相关药品，请联系管理员添加！</h3>
+                                    </div>
+                                    <!--<div class="comment-content">
+                                        <h5 class="m-0" >Helena</h5>
+                                        <p class="comment-date mb-2" >April 25, 2019 at 10:46 am</p>
+                                        <span class="num-rating white" >4.6/5</span>
+                                        <span class="comment-title"><i>"是药三分毒，切忌不要乱吃药！"</i></span>
+                                        <p class="comment mt-2" >
+                                            Take in the iconic skyline and visit the neighbourhood hangouts that you've
+                                            only ever seen on TV. Take in the iconic skyline and visit
+                                            the neighbourhood.
+                                        </p>
+                                    </div>-->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<div th:replace="common/common-bar::#back"></div>
+
+<div th:replace="common/common-bar::#footer"></div>
+
+<div th:replace="common/common-bar::#search"></div>
+
+<div th:replace="common/common-bar::#back-to-top"></div>
+
+<script src="assets/js/jquery-3.5.1.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
+<script src="assets/js/plugin.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/custom-swiper.js"></script>
+<script src="assets/js/custom-nav.js"></script>
+<script src="common/utils/reg.js"></script>
+<script src="common/layer/layer.js"></script>
+<script src="common/custom.js"></script>
+<script src="assets/js/xtiper.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zxx" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Ayurvedic - Medical Template</title>
+
+    <link rel="shortcut icon" type="image/x-icon" href="assets/images/cropped-favicon-32x32.png"/>
+
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/css/style.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/css/plugin.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/css/dashboard.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/fonts/flaticon.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/css/icons.css" rel="stylesheet" type="text/css"/>
+
+    <link rel="stylesheet" href="assets/fonts/line-icons.css" type="text/css"/>
+    <link rel="stylesheet" href="common/font-awesome/css/font-awesome.min.css">
+</head>
+<body>
+
+<div id="preloader">
+    <div id="status"></div>
+</div>
+
+
+<div th:replace="common/common-bar::#header"></div>
+
+<div id="dashboard">
+    <div class="container">
+        <div class="dashboard-main">
+            <div class="row">
+                <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12">
+                    <div th:replace="common/common-bar::#dashboard-sidebar(cur='doctor')"></div>
+                </div>
+                <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
+                    <div class="dashboard-content">
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12">
+                                <div class="message">
+                                    <div class="message-header inbox-item">
+                                        <div class="inbox-image">
+                                            <img src="assets/images/team/user-2.jpg" alt="image">
+                                        </div>
+                                        <div class="inbox-content">
+                                            <p>智能在线医生</p>
+                                            <span>你的专属医生，随时为您服务！</span>
+                                        </div>
+                                    </div>
+                                    <div class="message-content">
+                                        <div id="messages" style="height: 260px;overflow-y: auto">
+                                            <div class="msg-received">
+                                                <div class="msg-image">
+                                                    <img src="assets/images/team/user-2.jpg" alt="image">
+                                                </div>
+                                                <div class="msg-content">
+                                                    <p>现在</p>
+                                                    <p class="msg">
+                                                        [[${session.loginUser.userName}]]你好，我是您的智能专属医生薛伟，身体不舒服或者有任何需要咨询的问题，都可以向我提问，我会全心全意为您解答！</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="msg-reply">
+                                            <textarea id="message" placeholder="输入要咨询的内容..."></textarea>
+                                            <button onclick="send()" class="btn btn-na mt-2 pull-right">发送</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div th:replace="common/common-bar::#back"></div>
+
+<div th:replace="common/common-bar::#footer"></div>
+
+<div th:replace="common/common-bar::#search"></div>
+
+<div th:replace="common/common-bar::#back-to-top"></div>
+
+<script src="assets/js/jquery-3.5.1.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
+<script src="assets/js/plugin.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/custom-nav.js"></script>
+<script src="assets/js/jpanelmenu.min.js"></script>
+<script src="assets/js/dashboard-custom.js"></script>
+<script src="common/utils/reg.js"></script>
+<script src="common/layer/layer.js"></script>
+<script src="common/custom.js"></script>
+</body>
+</html>
+
+<script>
+    window.onload = messageInit;
+</script>

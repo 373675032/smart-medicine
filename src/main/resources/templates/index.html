@@ -1,0 +1,148 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zxx" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>智慧医药系统</title>
+
+    <link rel="shortcut icon" type="image/x-icon" href="assets/images/cropped-favicon-32x32.png"/>
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/css/style.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/css/plugin.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/css/dashboard.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/fonts/flaticon.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/css/icons.css" rel="stylesheet" type="text/css"/>
+
+    <link rel="stylesheet" href="assets/fonts/line-icons.css" type="text/css"/>
+    <link rel="stylesheet" href="common/font-awesome/css/font-awesome.min.css">
+</head>
+<body class="home-3">
+
+<div id="preloader">
+    <div id="status"></div>
+</div>
+
+<div th:replace="common/common-bar::#header"></div>
+
+<section class="banner">
+    <div class="container">
+        <div class="banner-content">
+            <div class="row flex-row-reverse align-items-end">
+                <div class="col-lg-6 col-md-12 col-sm-12 text-end">
+                    <div class="banner-ct-wrap">
+                        <div class="banner-head">
+                            <h4 class="cl-green">智慧医药</h4>
+                            <h1>最好的医疗咨询和自我诊断健康中心</h1>
+                        </div>
+                        <div class="banner-detail pb-2">
+                            <p>The best healthcare and self diagnostic health center</p>
+                        </div>
+                        <a href="aboutUs" class="btn">了解更多</a>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-12 col-sm-12">
+                    <div class="banner-image-3">
+                        <img src="assets/images/banner/NTH_M71_07_07-2048x1191.png" alt=""/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="svg-image svg-img-rotate position-absolute start-0 bottom-0 w-100">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" preserveAspectRatio="none">
+            <path class="elementor-shape-fill" opacity="0.33"
+                  d="M473,67.3c-203.9,88.3-263.1-34-320.3,0C66,119.1,0,59.7,0,59.7V0h1000v59.7 c0,0-62.1,26.1-94.9,29.3c-32.8,3.3-62.8-12.3-75.8-22.1C806,49.6,745.3,8.7,694.9,4.7S492.4,59,473,67.3z"></path>
+            <path class="elementor-shape-fill" opacity="0.66"
+                  d="M734,67.3c-45.5,0-77.2-23.2-129.1-39.1c-28.6-8.7-150.3-10.1-254,39.1 s-91.7-34.4-149.2,0C115.7,118.3,0,39.8,0,39.8V0h1000v36.5c0,0-28.2-18.5-92.1-18.5C810.2,18.1,775.7,67.3,734,67.3z"></path>
+            <path class="elementor-shape-fill"
+                  d="M766.1,28.9c-200-57.5-266,65.5-395.1,19.5C242,1.8,242,5.4,184.8,20.6C128,35.8,132.3,44.9,89.9,52.5C28.6,63.7,0,0,0,0 h1000c0,0-9.9,40.9-83.6,48.1S829.6,47,766.1,28.9z"></path>
+        </svg>
+    </div>
+</section>
+
+<section th:if="${session.loginUser == null}" class="appointment bg-sfgrey-3">
+    <div class="container">
+        <div class="row align-items-center flex-mxl-column-reverse">
+            <div class="col-lg-6 col-md-12">
+                <div class="appoint-form mb-xs-0">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <input id="userAccount" type="text" class="form-control" placeholder="登录用户名"/>
+                        </div>
+                        <div class="col-md-6">
+                            <input id="userName" type="text" class="form-control" placeholder="姓名"/>
+                        </div>
+
+                        <div class="col-6">
+                            <input id="userPwd" type="password" class="form-control" placeholder="登录密码"/>
+                        </div>
+
+                        <div class="col-md-6">
+                            <input id="userTel" type="number" class="form-control" placeholder="手机号码"/>
+                        </div>
+
+
+                        <div class="col-md-6">
+                            <input id="userAge" type="number" class="form-control" placeholder="年龄"/>
+                        </div>
+
+                        <div class="col-md-6">
+                            <select id="userSex" class="niceSelect">
+                                <option selected value="男">男</option>
+                                <option value="女">女</option>
+                            </select>
+                        </div>
+
+                        <div class="col-6">
+                            <input id="userEmail" type="text" class="form-control" placeholder="邮箱地址"/>
+                        </div>
+                        <div class="col-4">
+                            <input id="code" type="text" class="form-control" placeholder="验证码"/>
+                        </div>
+                        <div class="col-2">
+                            <button id="email-code" class="btn btn-na" onclick="sendEmailCode()">获取</button>
+                        </div>
+
+                        <div class="col-12 text-center">
+                            <button onclick="register()" class="btn btn-primary">立即注册</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-12 ps-lg-5">
+                <div class="sc-title-two sc-border-left sc-border-none appoint-info w-100 mb-xs-0">
+                    <h2 class="mt-3 mb-3">注册账号后可以享受更多权益</h2>
+                    <p>最好的医疗咨询和自我诊断健康中心，为您提供自我诊断、疾病百科、最新资讯等优质内容，欢迎您的体验！</p><br>
+                    <p>智慧医药您提供疾病查询,常见疾病大全,帮您全面了解疾病病因症状、检查治疗、饮食护理等信息,是您疾病查询的好帮手。</p>
+                    <h3 class="cl-lgreen mt-3 mb-3">CALL: 8888 6666</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<div th:replace="common/common-bar::#back"></div>
+
+<div th:replace="common/common-bar::#footer"></div>
+
+<div th:replace="common/common-bar::#search"></div>
+
+<div th:replace="common/common-bar::#back-to-top"></div>
+
+<script src="assets/js/jquery-3.5.1.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
+<script src="assets/js/plugin.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/custom-swiper.js"></script>
+<script src="assets/js/custom-nav.js"></script>
+<script src="common/utils/reg.js"></script>
+<script src="common/layer/layer.js"></script>
+<script src="common/custom.js"></script>
+</body>
+</html>

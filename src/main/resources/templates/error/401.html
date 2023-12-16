@@ -1,0 +1,61 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zxx" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>智慧医药系统 - 无权限访问</title>
+
+    <link rel="shortcut icon" type="image/x-icon" href="images/cropped-favicon-32x32.png"/>
+
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/css/style.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/css/plugin.css" rel="stylesheet" type="text/css"/>
+
+    <link rel="stylesheet" href="common/font-awesome/css/font-awesome.min.css">
+</head>
+<body>
+
+<div id="preloader">
+    <div id="status"></div>
+</div>
+
+
+<div th:replace="common/common-bar::#header"></div>
+
+<section class="error-mg">
+    <div class="container">
+        <div class="search-again text-center p-5 pb-0">
+            <div class="sc-title-two text-center mb-6">
+                <h4 class="cl-grey">抱歉，您没有权限访问此资源</h4>
+                <h1>401</h1>
+            </div>
+            <div class="w-lg-75 m-auto">
+                <div class="side-search position-relative overflow-hidden rounded-1 w-lg-50 m-auto mt-4 mb-4">
+                    <input type="text" class="form-control" id="search" placeholder="搜索一下 ..."/>
+                    <a href="#" class="search-btn sh-hover bg-lgreen"><i class="fa fa-search"></i></a>
+                </div>
+            </div>
+            <a href="index" class="btn">返回首页</a>
+        </div>
+    </div>
+</section>
+
+<div th:replace="common/common-bar::#back"></div>
+
+<div th:replace="common/common-bar::#footer"></div>
+
+<div th:replace="common/common-bar::#search"></div>
+
+<div th:replace="common/common-bar::#back-to-top"></div>
+
+<script src="assets/js/jquery-3.5.1.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
+<script src="assets/js/plugin.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/custom-swiper.js"></script>
+<script src="assets/js/custom-nav.js"></script>
+<script src="common/custom.js"></script>
+</body>
+</html>

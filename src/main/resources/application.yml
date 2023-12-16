@@ -1,0 +1,47 @@
+spring:
+  # 数据源配置
+  datasource:
+    username: root
+    password: 123456
+    url: jdbc:mysql://127.0.0.1:3306/smart-medicine?serverTimezone=Hongkong&useAffectedRows=true&characterEncoding=utf-8
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  # 邮件配置
+  mail:
+    username: 373675032@qq.com
+    password:
+    host: smtp.qq.com
+    port: 465
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          socketFactory:
+            port: 465
+            class: javax.net.ssl.SSLSocketFactory
+            fallback: false
+    valid: 5
+    title: "寻药就医系统 - 用户认证"
+    template: "您的动态验证码为：<strong style='color: red'>%s</strong>，%d分钟内有效，若非本人操作，请勿泄露。"
+# 日志配置
+logging:
+  level:
+    world.world.xuewei.dao.mapper: debug
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# 阿里云通义千问配置
+ai-key: sk-xxxxxxxxxxxxx
+# 阿里云对象存储配置
+oss:
+  bucket-name: xxxxxxxxxxx
+  end-point: xxxxxxxxxx
+  access-key: xxxxxxxxxxxxxxxx
+  access-secret: xxxxxxxxxxxxxxx

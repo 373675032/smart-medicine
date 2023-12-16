@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zxx" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Ayurvedic - Medical Template</title>
+
+    <link rel="shortcut icon" type="image/x-icon" href="assets/images/cropped-favicon-32x32.png"/>
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/css/style.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/css/plugin.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/css/dashboard.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/fonts/flaticon.css" rel="stylesheet" type="text/css"/>
+
+    <link href="assets/css/icons.css" rel="stylesheet" type="text/css"/>
+
+    <link rel="stylesheet" href="assets/fonts/line-icons.css" type="text/css"/>
+    <link rel="stylesheet" href="common/font-awesome/css/font-awesome.min.css">
+
+</head>
+<body>
+
+<div id="preloader">
+    <div id="status"></div>
+</div>
+
+<div th:replace="common/common-bar::#header"></div>
+
+
+<section class="search-list bg-sfgrey-3">
+    <div class="container">
+        <h2 style="text-align: center;margin-bottom: 30px;margin-top: -70px;color: #204066" th:text="${title}"></h2>
+        <div class="row" th:if="${illness.size()>0}">
+            <div class="col-lg-4 col-md-6 mb-3" th:each="illnessOne:${illness}">
+                <div class="search-list-wp bg-white">
+                    <div class="p-4" style="height: 250px">
+                        <h5 class="mb-3">
+                            <a th:href="@{findIllnessOne(id=${illnessOne.id})}" class="cl-blue" th:text="${illnessOne.illness_name}"> Great Services Provided to Help You Take
+                                Control </a>
+                        </h5>
+                        <p th:text="${illnessOne.include_reason}">
+
+                        </p>
+                    </div>
+                    <ul class="border-top border-light-c">
+                        <li>[[${#dates.format(illnessOne.create_time,'yyyy-MM-dd HH:mm:ss')}]] | <a th:href="@{findIllness(kind=${illnessOne.kindName eq '暂无归属类'}?null:${illnessOne.kind_id})}">[[${illnessOne.kindName}]]</a></li>
+                        <li style="float: right"><i class="fa fa-eye" aria-hidden="true"></i>[[${illnessOne.pageview}]]</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div style="text-align: center" class="row" th:if="${illness.size()<1}">
+            <h4>没有搜索到相应的结果，可联系管理员加入</h4>
+        </div>
+        <div style="text-align: center" th:if="${illness.size()>0}">
+<!--            <a th:if="${page eq 1}" style="pointer-events:none;margin-right: 5px"><span>上一页</span></a>-->
+            <a th:href="@{findIllness(page=${page - 1})}" th:if="${page gt 1}" style="right: 5px"><span>上一页</span></a>
+<!--            <a th:if="${page eq size}" style="pointer-events:none;margin-left: 5px"><span>下一页</span></a>-->
+            <a th:href="@{findIllness(page=${page+1})}" th:if="${page ge 1 && page lt size}" style="margin-left: 5px"><span>下一页</span></a>
+        </div>
+    </div>
+</section>
+
+
+<div class="breadcrumb-wrap mt-0">
+    <div class="container"></div>
+    <div class="overlay"></div>
+</div>
+<section class="search-list-sh p-0">
+    <div class="container">
+        <div class="search-again bg-white text-center mt-n3">
+            <div class="sc-title-two text-center mb-6">
+                <h4 class="cl-green">没有找到你想要的结果吗？</h4>
+                <h2>搜索一下</h2>
+            </div>
+            <div class="w-lg-75 m-auto">
+                <p>
+                    智慧医药您提供疾病查询,常见疾病大全,帮您全面了解疾病病因症状、检查治疗、饮食护理等信息,是您疾病查询的好帮手。
+                </p>
+                <div class="side-search position-relative overflow-hidden rounded-1 w-lg-50 m-auto mt-4">
+                    <input type="text" class="form-control" id="search" placeholder="搜索..."/>
+                    <a th:if="${kind eq null}" class="search-btn sh-hover bg-lgreen" th:onclick="searchGroupByName()"><i class="fa fa-search"></i></a>
+                    <a th:if="${kind ne null}" class="search-btn sh-hover bg-lgreen" th:onclick="searchGroup([[${kind}]])"><i class="fa fa-search"></i></a>
+                </div>
+                <div style="margin-top: 20px">
+                    <span>分类：</span>
+                    <a th:each="kind:${kindList}" th:href="@{findIllness(kind=${kind.id})}"><span th:text="${kind.name}"></span>&nbsp;&nbsp;&nbsp;</a>
+                </div>
+                <div th:if="${history ne null}" style="margin-top: 10px">
+                    <span>搜索历史：</span>
+<!--                    <a th:each="his:${history}" th:href="@{findIllness(kind=${his.kind eq '无'}?null:${his.kind},illnessName=${his.nameValue eq '无'}?null:${his.nameValue})}"><span th:text="${his.searchValue}"></span>&nbsp;&nbsp;&nbsp;</a>-->
+                    <a th:each="his:${history}" th:href="${his.operateType eq 3}?@{findMedicines(nameValue=${his.searchValue})}:@{findIllness(kind=${his.kind eq '无'}?null:${his.kind},illnessName=${his.nameValue eq '无'}?null:${his.nameValue})}"><span th:text="${his.operateType eq 3}?(${his.searchValue} + '(药)'):${his.searchValue}"></span>&nbsp;&nbsp;&nbsp;</a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<div th:replace="common/common-bar::#back"></div>
+
+<div th:replace="common/common-bar::#footer"></div>
+
+<div th:replace="common/common-bar::#search"></div>
+
+<div th:replace="common/common-bar::#back-to-top"></div>
+
+
+<script src="assets/js/jquery-3.5.1.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
+<script src="assets/js/plugin.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/custom-swiper.js"></script>
+<script src="assets/js/custom-nav.js"></script>
+<script src="common/utils/reg.js"></script>
+<script src="common/layer/layer.js"></script>
+<script src="common/custom.js"></script>
+<script src="assets/js/xtiper.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<header id="header" class="main_header_area">
+    <div class="topbar-wrap bg-dblue">
+        <div class="container">
+            <div class="top-info d-flex justify-content-between align-items-center">
+                <ul class="t-address">
+                    <li class="pr-2"><i class="far fa-clock"></i>丹心擘划宏图展，医界绽奇葩。【欢迎来到智慧医药系统】本项目原创作者：<a
+                            href="http://xuewei.world">薛伟同学</a></li>
+                </ul>
+
+                <ul class="t-social">
+                    <li>
+                        <span class="ct-search-link"><a href="#"><i class="fa fa-search"></i> 搜索一下</a></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="header_menu">
+        <nav class="navbar navbar-default">
+            <div class="container">
+                <div class="navbar-flex d-flex align-items-center justify-content-between w-100">
+
+                    <div class="navbar-header">
+                        <a class="navbar-brand text-center" href="index.html">
+                            <img src="assets/images/logo.png" alt="image"/>
+                        </a>
+                    </div>
+
+                    <div class="navbar-collapse1" id="bs-example-navbar-collapse-1">
+                        <ul class="nav navbar-nav" id="responsive-menu">
+                            <li><a href="findIllness">疾病百科</a></li>
+                            <li><a href="findMedicines">查找药品</a></li>
+                            <li><a href="doctor">智能医生</a></li>
+                        </ul>
+                    </div>
+                    <div th:if="${session.loginUser == null}" class="header-btn">
+                        <input id="loginAccount" type="text" placeholder="登录账户">
+                    </div>
+                    <div th:if="${session.loginUser == null}" class="header-btn">
+                        <input id="loginPassword" type="password" placeholder="密码">
+                    </div>
+                    <div th:if="${session.loginUser == null}" class="header-btn">
+                        <button class="btn btn-na" onclick="login()">登录</button>
+                    </div>
+
+                    <div th:if="${session.loginUser != null}" class="register-login">
+                        <div class="dropdown">
+                            <button class="btn-dash dropdown-toggle" type="button" id="dropdownMenuButton11"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa fa-user-circle"></i> 欢迎你【 [[${session.loginUser.userName}]] 】
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton11">
+                                <a class="dropdown-item" href="profile"><i class="sl sl-icon-user"></i> 我的资料</a>
+                                <a class="dropdown-item" href="logout"><i class="sl sl-icon-power"></i> 退出登录</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </nav>
+    </div>
+
+</header>
+
+<section id="back" class="call-to p-5 bg-green">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-4 col-md-12">
+                <div class="call-contact d-flex align-items-center">
+                    <i class="fas fa-phone-alt display-6 cl-white"></i>
+                    <div class="pl-3">
+                        <h4 class="cl-white">有问题？要反馈？</h4>
+                        <p class="m-0 cl-white">(+86) 8888 8888 8888</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-12">
+                <p class="call-to-mid cl-white">联系我们并且提交反馈，我们会悉心听取您的意见！</p>
+            </div>
+            <div class="col-lg-4 col-md-12 text-center">
+                <a href="feedback.html" class="btn btn-white">提交反馈</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer id="footer" class="footer bg-ftblue">
+    <div class="footer-wrap">
+        <div class="container">
+            <div class="row">
+                <div class="col-3">
+                    <div class="ft-lists">
+                        <h3 class="cl-white">友情链接</h3>
+                        <ul class="d-flex flex-column">
+                            <li><a href="http://www.pptsd.com/">医疗百科网</a></li>
+                            <li><a href="http://www.chls.net/">医学教育网</a></li>
+                            <li><a href="http://www.pharmnet.com.cn/">中国医药网</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="ft-lists">
+                        <h3 class="cl-white">联系我们</h3>
+                        <ul class="d-flex flex-column">
+                            <li><a href="#">地址：XXX XXX</a></li>
+                            <li><a href="#">官网：www.xxx.com</a></li>
+                            <li><a href="#">电话：8888 6666</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="ft-lists">
+                        <h3 class="cl-white">便捷通道</h3>
+                        <ul class="d-flex flex-column">
+                            <li><a href="findIllness">查看疾病百科</a></li>
+                            <li><a href="findMedicines">我要查找药品</a></li>
+                            <li><a href="doctor">智能医生</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="ft-lists">
+                        <h3 class="cl-white">网站理念</h3>
+                        <p class="cl-white">
+                            智慧医药您提供疾病查询,常见疾病大全,帮您全面了解疾病病因症状、检查治疗、饮食护理等信息,是您疾病查询的好帮手。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="copyright-main p-3 bg-footer-blue">
+        <div class="container">
+            <div class="copyright-text d-flex justify-content-between">
+                <p class="cl-white m-0">© 2022 智慧医药系统.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<form id="search" action="findIllness" class="ct-searchForm">
+    <div class="inner">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-sm-8">
+                    <div class="form-group">
+                        <input id="cf-search-form" type="text" placeholder="搜索一下，了解更多 ..." required
+                               class="form-control" name="illnessName"/>
+                        <button class="ct-search-btn"><i class="fa fa-search"></i></button>
+                    </div>
+                    <div class="form-group">
+                        <a href="#" class="ct-searchForm-close">
+                            <i class="fa fa-times" style="color: white"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div id="back-to-top">
+    <a href="#"><i style="color: white;font-size: 40px" class="fa fa-arrow-up"></i></a>
+</div>
+
+<div id="dashboard-sidebar" class="dashboard-sidebar">
+    <div class="profile-sec">
+        <div class="author-news mb-3">
+            <div class="author-news-content text-center p-3">
+                <div class="author-thumb mt-0">
+                    <img th:src="${session.loginUser.imgPath}" alt="author"/>
+                </div>
+                <div class="author-content pt-2 p-0">
+                    <h3 class="mb-1" th:text="${session.loginUser.userName}"></h3>
+                    <p class="detail"><i class="fa fa-phone"></i> [[${session.loginUser.userTel}]]</p>
+                    <p class="detail"><i class="fa fa-envelope-o"></i> [[${session.loginUser.userEmail}]]</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a href="#" class="dashboard-responsive-nav-trigger"><i class="fa fa-reorder"></i> Dashboard
+        Navigation</a>
+    <div class="dashboard-nav">
+        <div class="dashboard-nav-inner">
+            <ul>
+                <li th:class="${cur == 'profile' ? 'active': ''}">
+                    <a href="profile"><i class="sl sl-icon-user"></i> 我的资料</a>
+                </li>
+                <li th:class="${cur == 'doctor' ? 'active': ''}">
+                    <a href="doctor"><i class="sl sl-icon-envelope-open"></i>智能医生</a>
+                </li>
+                <li th:if="${session.loginUser.roleStatus eq 1}" th:class="${cur == 'illness' ? 'active': ''}">
+                    <a href="all-illness"><i class="sl sl-icon-layers"></i> 疾病管理</a>
+                </li>
+                <li th:if="${session.loginUser.roleStatus eq 1}" th:class="${cur == 'medicine' ? 'active': ''}">
+                    <a href="all-medical"><i class="sl sl-icon-layers"></i> 药品管理</a>
+                </li>
+                <li th:if="${session.loginUser.roleStatus eq 1}" th:class="${cur == 'feedback' ? 'active': ''}">
+                    <a href="all-feedback"><i class="sl sl-icon-layers"></i> 反馈管理</a>
+                </li>
+                <li>
+                    <a href="logout"><i class="sl sl-icon-power"></i> 退出登录</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+</body>
+</html>
