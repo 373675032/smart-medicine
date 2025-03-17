@@ -21,6 +21,9 @@
 - 版本 A：在当前版本基础上，新增医生信息管理功能、新增系统信息炫酷大屏统计
 - 版本 B：与当前版本功能一致，但前端页面全部焕新，就像两个项目一样
 
+![](https://xuewei-blog.oss-cn-beijing.aliyuncs.com/202503171517368.png)
+
+![](https://xuewei-blog.oss-cn-beijing.aliyuncs.com/202503171517541.png)
 ### 角色介绍
 
 系统共设计了三个角色：游客、用户、管理员。
