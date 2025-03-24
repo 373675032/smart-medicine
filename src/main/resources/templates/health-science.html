@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zxx" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>健康科普</title>
+
+    <link rel="shortcut icon" type="image/x-icon" href="assets/images/cropped-favicon-32x32.png"/>
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/plugin.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/dashboard.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/fonts/flaticon.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/icons.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="assets/fonts/line-icons.css" type="text/css"/>
+    <link rel="stylesheet" href="common/font-awesome/css/font-awesome.min.css">
+    <style>
+           /* 主要内容区域样式 */
+           .main-content {
+            padding-top: 300px; /* 给顶部导航留出空间 */
+            padding-bottom: 50px;
+            min-height: calc(100vh - 400px); /* 确保内容区域足够高 */
+        }
+        
+        .page-title {
+            margin-left: 546px;
+            font-size: 24px;
+            color: #333;
+            padding: 20px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            position: relative;
+        }
+        
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100px;
+            height: 2px;
+            background-color: #007bff;
+        }
+        
+        .news-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        
+        .news-item {
+            background: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            display: flex;
+            gap: 20px;
+        }
+        
+        .news-item:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .news-image {
+            flex: 0 0 200px;
+            display: none; /* 默认隐藏 */
+        }
+        
+        .news-image.has-image {
+            display: block; /* 有图片时显示 */
+        }
+        
+        .news-image img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        
+        .news-content {
+            flex: 1;
+        }
+        
+        .news-title {
+            margin: 0 0 10px 0;
+        }
+        
+        .news-title a {
+            color: #333;
+            font-size: 18px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .news-title a:hover {
+            color: #007bff;
+        }
+        
+        .news-keywords {
+            color: #666;
+            font-size: 14px;
+            margin: 8px 0;
+        }
+        
+        .news-keywords span {
+            color: #007bff;
+        }
+        
+        .news-meta {
+            color: #999;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .news-date {
+            float: right;
+        }
+        
+        /* 分页样式 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            padding: 20px 0;
+        }
+        
+        .pagination a {
+            color: #333;
+            padding: 8px 16px;
+            text-decoration: none;
+            border: 1px solid #ddd;
+            margin: 0 4px;
+            border-radius: 4px;
+        }
+        
+        .pagination a:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .pagination .active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        .pagination .disabled {
+            color: #999;
+            pointer-events: none;
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div id="preloader">
+        <div id="status"></div>
+    </div>
+
+    <div th:replace="common/common-bar::#header"></div>
+
+    <div class="main-content">
+        <div class="page-title">健康科普</div>
+        <div class="container">
+            <div class="news-list">
+                <div class="news-item" th:each="news : ${newsList}">
+                    <!-- 标题图片 -->
+                    <div class="news-image" th:if="${news.imgPath != null and news.imgPath != ''}"
+                         th:classappend="${news.imgPath != null and news.imgPath != ''} ? 'has-image'">
+                        <img th:src="${news.imgPath}" alt="新闻图片"/>
+                    </div>
+                    
+                    <div class="news-content">
+                        <h3 class="news-title">
+                            <a th:href="@{/health-science-detail(id=${news.id})}" 
+                               th:text="${news.newsName}">标题</a>
+                        </h3>
+                        
+                        <!-- 关键字 -->
+                        <div class="news-keywords" th:if="${news.newsKey != null and news.newsKey != ''}">
+                            关键字：<span th:text="${news.newsKey}">关键字</span>
+                        </div>
+                        
+                        <div class="news-meta">
+                            <span class="news-date" 
+                                  th:text="${#dates.format(news.createTime, 'yyyy-MM-dd')}">
+                                2024-02-21
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 分页组件 -->
+            <div class="pagination" th:if="${pages > 1}">
+                <a th:href="@{/health-science(page=1)}" 
+                   th:class="${current == 1 ? 'disabled' : ''}">首页</a>
+                <a th:href="@{/health-science(page=${current - 1})}" 
+                   th:class="${current == 1 ? 'disabled' : ''}">&laquo; 上一页</a>
+                <a th:each="i : ${#numbers.sequence(1, pages)}"
+                   th:href="@{/health-science(page=${i})}"
+                   th:text="${i}"
+                   th:class="${current == i ? 'active' : ''}">1</a>
+                <a th:href="@{/health-science(page=${current + 1})}" 
+                   th:class="${current == pages ? 'disabled' : ''}">下一页 &raquo;</a>
+                <a th:href="@{/health-science(page=${pages})}" 
+                   th:class="${current == pages ? 'disabled' : ''}">末页</a>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="common/common-bar::#footer"></div>
+    <div th:replace="common/common-bar::#search"></div>
+    <div th:replace="common/common-bar::#back-to-top"></div>
+
+    <!-- 添加必要的JavaScript文件 -->
+    <script src="assets/js/jquery-3.5.1.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/plugin.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/custom-swiper.js"></script>
+    <script src="assets/js/custom-nav.js"></script>
+    <script src="common/utils/reg.js"></script>
+    <script src="common/layer/layer.js"></script>
+    <script src="common/custom.js"></script>
+</body>
+</html> 

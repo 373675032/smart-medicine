@@ -2,34 +2,31 @@ package world.xuewei.controller;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import world.xuewei.constant.MedicalConstants;
 import world.xuewei.entity.*;
+import world.xuewei.service.MedicalNewsService;
 import world.xuewei.utils.Assert;
 
 import java.util.*;
+import javax.annotation.Resource;
+import org.springframework.ui.Model;
 
 /**
  * 系统跳转控制器
- * <p>
- * ==========================================================================
- * 郑重说明：本项目免费开源！原创作者为：薛伟同学，严禁私自出售。
- * ==========================================================================
- * B站账号：薛伟同学
- * 微信公众号：薛伟同学
- * 作者博客：http://xuewei.world
- * ==========================================================================
- * 陆陆续续总会收到粉丝的提醒，总会有些人为了赚取利益倒卖我的开源项目。
- * 不乏有粉丝朋友出现钱付过去，那边只把代码发给他就跑路的，最后还是根据线索找到我。。
- * 希望各位朋友擦亮慧眼，谨防上当受骗！
- * ==========================================================================
  *
  * @author <a href="http://xuewei.world/about">XUEW</a>
  */
 @Controller
 public class SystemController extends BaseController<User> {
+
+    @Resource
+    private MedicalNewsService medicalNewsService;
 
     /**
      * 首页
@@ -255,5 +252,60 @@ public class SystemController extends BaseController<User> {
         List<Medicine> medicines = medicineService.all();
         map.put("medicines", medicines);
         return "all-medical";
+    }
+
+    @GetMapping("health-science")
+    public String healthScience(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                              @RequestParam(value = "size", defaultValue = "5") Integer size,
+                              Map<String, Object> map) {
+        Map<String, Object> pageResult = medicalNewsService.page(page, size);
+        map.putAll(pageResult);
+        return "health-science";
+    }
+
+    @GetMapping("health-science-detail")
+    public String healthScienceDetail(@RequestParam("id") Long id, Model model) {
+        // 获取当前文章
+        MedicalNews news = medicalNewsService.get(id);
+        model.addAttribute("news", news);
+        
+        // 获取上一篇
+        MedicalNews prev = medicalNewsService.getPrevious(id);
+        model.addAttribute("prev", prev);
+        
+        // 获取下一篇
+        MedicalNews next = medicalNewsService.getNext(id);
+        model.addAttribute("next", next);
+        
+        return "health-science-detail";
+    }
+
+    @GetMapping("/all-health-science")
+    public String allHealthScience(Model model, 
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size) {
+
+        // 使用已有的分页方法
+        Map<String, Object> pageResult = medicalNewsService.page(page, size);
+
+        // 确保所有必要的分页数据都添加到模型中
+        model.addAttribute("newsList", pageResult.get("newsList"));
+        model.addAttribute("current", pageResult.get("current"));
+        model.addAttribute("pages", pageResult.get("pages"));
+        model.addAttribute("total", pageResult.get("total"));
+
+        return "all-health-science";
+    }
+    @GetMapping("add-health-science")
+    public String addHealthScience(Integer id, Map<String, Object> map) {
+        if (Assert.isEmpty(loginUser)) {
+            return "redirect:/index.html";
+        }
+        MedicalNews news = new MedicalNews();
+        if (Assert.notEmpty(id)) {
+            news = medicalNewsService.get(id);
+        }
+        map.put("news", news);
+        return "add-health-science";
     }
 }

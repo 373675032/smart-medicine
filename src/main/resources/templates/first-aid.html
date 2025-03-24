@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>急救指南</title>
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="shortcut icon" type="image/x-icon" th:href="@{/assets/images/cropped-favicon-32x32.png}"/>
+    <link th:href="@{/assets/css/bootstrap.min.css}" rel="stylesheet" type="text/css"/>
+    <link th:href="@{/assets/css/style.css}" rel="stylesheet" type="text/css"/>
+    <link th:href="@{/assets/css/plugin.css}" rel="stylesheet" type="text/css"/>
+    <link th:href="@{/assets/css/dashboard.css}" rel="stylesheet" type="text/css"/>
+    <link th:href="@{/assets/fonts/flaticon.css}" rel="stylesheet" type="text/css"/>
+    <link th:href="@{/assets/css/icons.css}" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" th:href="@{/assets/fonts/line-icons.css}" type="text/css"/>
+    <link rel="stylesheet" th:href="@{/common/font-awesome/css/font-awesome.min.css}">
+    <style>
+        /* 主要内容区域样式 */
+        .main-content {
+            padding-top: 300px; /* 给顶部导航留出空间 */
+            padding-bottom: 50px;
+            min-height: calc(100vh - 260px); /* 确保内容区域足够高 */
+        }
+        .category-header {
+            margin-bottom: 15px;
+        }
+
+        .category-title {
+            color: #333;
+            font-size: 16px;
+            font-weight: 500;
+            margin: 0;
+            padding: 10px 0;
+        }
+
+        .guide-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .guide-item {
+            background: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.2s ease;
+        }
+
+        .guide-item:hover {
+            color: #fff;
+            background: #4263EB;
+            border-color: #4263EB;
+        }
+
+        .category-section {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="common/common-bar::#header"></div>
+
+    <div class="main-content">
+        <div class="container">
+            <div class="guide-container">
+                <div th:each="category : ${categories}" class="category-section">
+                    <h3 th:text="${category.name}"></h3>
+                    <div class="guide-list">
+                        <div th:each="guide : ${allGuides.get(category.id)}" class="guide-item">
+                            <a th:href="@{/first-aid-detail(id=${guide.id})}">
+                                <h4 style="text-align: center;margin-top: 20px;" th:text="${guide.title}"></h4>
+                                
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="common/common-bar::#footer"></div>
+
+    <script src="assets/js/jquery-3.5.1.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 分类切换
+            $('.category-list a').click(function(e) {
+                e.preventDefault();
+                const categoryId = $(this).data('id');
+                $.get('/first-aid/category/' + categoryId, function(data) {
+                    // 更新指南列表
+                    updateGuideList(data);
+                });
+            });
+            
+            function updateGuideList(guides) {
+                const guideList = $('.guide-list');
+                guideList.empty();
+                guides.forEach(guide => {
+                    guideList.append(`
+                        <div class="guide-item">
+                            <a href="/first-aid-detail?id=${guide.id}">
+                                <h4>${guide.title}</h4>
+                                <div class="guide-meta">
+                                    <small>${new Date(guide.createTime).toLocaleDateString()}</small>
+                                </div>
+                            </a>
+                        </div>
+                    `);
+                });
+            }
+        });
+    </script>
+        <script th:src="@{/assets/js/jquery-3.5.1.min.js}"></script>
+        <script th:src="@{/assets/js/bootstrap.min.js}"></script>
+        <script th:src="@{/assets/js/plugin.js}"></script>
+        <script th:src="@{/assets/js/main.js}"></script>
+        <script th:src="@{/assets/js/custom-swiper.js}"></script>
+        <script th:src="@{/assets/js/custom-nav.js}"></script>
+        <script th:src="@{/common/utils/reg.js}"></script>
+        <script th:src="@{/common/layer/layer.js}"></script>
+        <script th:src="@{/common/custom.js}"></script>
+</body>
+</html> 

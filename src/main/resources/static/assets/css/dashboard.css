@@ -2683,7 +2683,7 @@ a:not([href]):not([tabindex]){color: #444;}
 }
 .dashboard-nav ul li.active, .dashboard-nav ul li:hover, .dashboard-nav ul li.active a, .dashboard-nav ul li:hover a {
     color: #fff!important;
-    background-color: #204066;
+    background-color: #3452EAFF;
 }
 /* ---------------------------------- */
 
