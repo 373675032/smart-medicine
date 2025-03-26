@@ -7,6 +7,8 @@ IMAGE_FILE="${IMAGE_NAME}.tar"
 REMOTE_USER="root"
 REMOTE_HOST="47.115.213.70"
 REMOTE_PATH="~/workspace/smart-medicine/"
+LOCAL_UPLOADS_DIR="./src/main/resources/static/upload" # 本地上传目录路径
+REMOTE_UPLOADS_DIR="/root/workspace/smart-medicine/uploads" # 远程上传目录路径
 
 # Echo function for logging
 function log_step() {
@@ -37,7 +39,19 @@ docker buildx build --platform linux/amd64 --load -t ${IMAGE_NAME}:latest . && e
 log_step "Saving Docker image to file: ${IMAGE_FILE}"
 docker save -o ${IMAGE_FILE} ${IMAGE_NAME}:latest && echo "Image saved successfully" || { echo "Failed to save image"; exit 1; }
 
-# Transfer the file to the remote server
+# Create remote uploads directory and sync local uploads
+log_step "Creating remote uploads directory and syncing files"
+ssh ${REMOTE_USER}@${REMOTE_HOST} "mkdir -p ${REMOTE_UPLOADS_DIR}" && echo "Remote directory created" || { echo "Failed to create remote directory"; exit 1; }
+
+# 如果本地上传目录存在，则同步文件
+if [ -d "${LOCAL_UPLOADS_DIR}" ]; then
+    log_step "Syncing upload files to remote server"
+    rsync -avz --progress ${LOCAL_UPLOADS_DIR}/ ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_UPLOADS_DIR}/ && echo "Upload files sync successful" || { echo "Upload files sync failed"; exit 1; }
+else
+    echo "Local uploads directory does not exist, skipping file sync"
+fi
+
+# Transfer the image file to the remote server
 log_step "Transferring ${IMAGE_FILE} to ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH}"
 rsync -avz --progress ${IMAGE_FILE} ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH} && echo "Transfer successful" || { echo "Transfer failed"; exit 1; }
 
@@ -46,6 +60,11 @@ log_step "Connecting to ${REMOTE_USER}@${REMOTE_HOST} to deploy the container"
 ssh ${REMOTE_USER}@${REMOTE_HOST} << EOF
     cd ${REMOTE_PATH}
     echo "Current directory: \$(pwd)"
+    
+    # 确保上传目录存在并设置权限
+    echo "Ensuring uploads directory exists with proper permissions"
+    mkdir -p ${REMOTE_UPLOADS_DIR}
+    chmod 777 ${REMOTE_UPLOADS_DIR}
     
     # Check if container exists and stop it
     echo "Checking for existing container: ${CONTAINER_NAME}"
@@ -71,10 +90,11 @@ ssh ${REMOTE_USER}@${REMOTE_HOST} << EOF
     echo "Loading Docker image from ${IMAGE_FILE}"
     docker load -i ${IMAGE_FILE}
     
-    # Run the new container
+    # Run the new container with volume mapping
     echo "Starting new container: ${CONTAINER_NAME}"
     docker run -d --name ${CONTAINER_NAME} \
         -p 8080:8080 \
+        -v ${REMOTE_UPLOADS_DIR}:/app/src/main/resources/static/upload \
         -e SPRING_PROFILES_ACTIVE=prod \
         ${IMAGE_NAME}:latest
     

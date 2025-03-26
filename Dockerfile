@@ -35,11 +35,15 @@ RUN mkdir -p /app/src/main/resources/static/upload && \
 # Copy the built JAR file from the build stage
 COPY --from=build /app/target/*.jar app.jar
 
-# Copy static resource files
-COPY --from=build /app/src/main/resources/static/upload /app/src/main/resources/static/upload
+# 不需要复制上传目录内容，因为会通过卷映射挂载
+# COPY --from=build /app/src/main/resources/static/upload /app/src/main/resources/static/upload
 
 # Set user to run the application (security best practice)
 RUN useradd -m javauser
+
+# 修改上传目录权限，确保javauser用户可以访问
+RUN chown -R javauser:javauser /app/src/main/resources/static/upload
+
 USER javauser
 
 # Expose the application port
