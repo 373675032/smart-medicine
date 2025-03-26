@@ -29,14 +29,14 @@ FROM --platform=linux/amd64 openjdk:8-jre-slim
 WORKDIR /app
 
 # Create upload directory with proper permissions
-#RUN mkdir -p /app/src/main/resources/static/upload && \
-#    chmod 777 /app/src/main/resources/static/upload
+RUN mkdir -p /app/src/main/resources/static/upload && \
+    chmod 777 /app/src/main/resources/static/upload
 
 # Copy the built JAR file from the build stage
 COPY --from=build /app/target/*.jar app.jar
 
-# 复制静态资源文件夹中的内容到容器中
-#COPY --from=build /app/src/main/resources/static/upload /app/src/main/resources/static/upload
+# Copy static resource files
+COPY --from=build /app/src/main/resources/static/upload /app/src/main/resources/static/upload
 
 # Set user to run the application (security best practice)
 RUN useradd -m javauser
