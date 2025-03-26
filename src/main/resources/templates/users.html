@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zxx" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>用户管理 - 智慧医药系统</title>
+
+    <link rel="shortcut icon" type="image/x-icon" href="assets/images/cropped-favicon-32x32.png"/>
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/plugin.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/dashboard.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/fonts/flaticon.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/icons.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="assets/fonts/line-icons.css" type="text/css"/>
+    <link rel="stylesheet" href="common/font-awesome/css/font-awesome.min.css">
+    <style>
+        /* 整体布局和卡片样式优化 */
+        .dashboard {
+            padding: 20px 0 30px;
+            background-color: #f5f7fa;
+            min-height: calc(100vh - 60px);
+        }
+        
+        .dashboard-content {
+            background-color: transparent;
+        }
+        
+        /* 统计卡片样式 */
+        .stats-cards {
+            display: flex;
+            margin-bottom: 25px;
+            gap: 20px;
+        }
+        
+        .stat-card {
+            flex: 1;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-card .icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .stat-card .label {
+            color: #777;
+            font-size: 14px;
+        }
+        
+        .all-users .icon {
+            background-color: rgba(41, 169, 225, 0.1);
+            color: #29a9e1;
+        }
+        
+        .doctors .icon {
+            background-color: rgba(255, 143, 0, 0.1);
+            color: #ff8f00;
+        }
+        
+        .admins .icon {
+            background-color: rgba(25, 118, 210, 0.1);
+            color: #1976d2;
+        }
+        
+        /* 用户列表盒子样式 */
+        .dashboard-list-box {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+        
+        .dashboard-title {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .dashboard-title h4 {
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+        
+        .user-count {
+            color: #777;
+            font-size: 14px;
+        }
+        
+        /* 表格样式 - 使用传统表格布局 */
+        .user-table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+        
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        
+        .user-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            white-space: nowrap;
+        }
+        
+        .user-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+        
+        .user-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        /* 调整各列宽度 - 调整操作列宽度 */
+        .user-table .col-account {
+            width: 120px;
+        }
+        
+        .user-table .col-name {
+            width: 140px;
+        }
+        
+        .user-table .col-age {
+            width: 90px;
+        }
+        
+        .user-table .col-type {
+            width: 90px;
+        }
+        
+        .user-table .col-role {
+            width: 90px;
+        }
+        
+        .user-table .col-audit {
+            width: 90px;
+        }
+        
+        .user-table .col-date {
+            width: 140px;
+        }
+        
+        /* 增加操作列宽度，确保3个按钮能完整显示 */
+        .user-table .col-actions {
+            width: 250px;
+            text-align: center;
+        }
+        
+        /* 标签样式 */
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            white-space: nowrap;
+        }
+        
+        .badge-doctor {
+            background-color: #e1f5fe;
+            color: #0288d1;
+        }
+        
+        .badge-user {
+            background-color: #e8f5e9;
+            color: #388e3c;
+        }
+        
+        .badge-admin {
+            background-color: #e8eaf6;
+            color: #3f51b5;
+        }
+        
+        .badge-normal {
+            background-color: #f5f5f5;
+            color: #616161;
+        }
+        
+        .badge-pending {
+            background-color: #fff8e1;
+            color: #ffa000;
+        }
+        
+        .badge-approved {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        /* 操作按钮样式优化 - 修改为居中对齐 */
+        .action-buttons {
+            display: flex;
+            gap: 10px; /* 增加按钮间距 */
+            justify-content: center; /* 改为居中对齐 */
+        }
+        
+        /* 增大按钮尺寸，确保完整显示 */
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            flex-shrink: 0; /* 防止按钮被压缩 */
+        }
+        
+        .btn-icon:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-role {
+            background-color: #4e73df;
+        }
+        
+        .btn-view {
+            background-color: #36b9cc;
+        }
+        
+        .btn-approve {
+            background-color: #1cc88a;
+        }
+        
+        .btn-reject {
+            background-color: #e74a3b;
+        }
+        
+        /* 分页样式 */
+        .pagination-box {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .pagination {
+            display: flex;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+        
+        .pagination a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 35px;
+            height: 35px;
+            margin: 0 3px;
+            padding: 0 12px;
+            border-radius: 50px;
+            background-color: white;
+            color: #333;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .pagination a:hover {
+            background-color: #f5f5f5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .pagination a.active {
+            background-color: #4e73df;
+            color: white;
+        }
+        
+        /* 资质图片查看器样式 */
+        .qualification-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 20px;
+        }
+        
+        .qualification-item {
+            flex: 0 0 calc(33.33% - 10px);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .qualification-item:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .qualification-item img {
+            width: 100%;
+            display: block;
+        }
+        
+        /* 无数据样式 */
+        .no-data {
+            padding: 50px 0;
+            text-align: center;
+        }
+        
+        .no-data i {
+            font-size: 48px;
+            color: #ddd;
+            margin-bottom: 15px;
+        }
+        
+        .no-data p {
+            color: #999;
+            font-size: 15px;
+            margin: 0;
+        }
+        
+        @media (max-width: 992px) {
+            .stats-cards {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            /* 移动端下按钮尺寸不变，保持完整显示 */
+            .action-buttons {
+                gap: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="preloader">
+    <div id="status"></div>
+</div>
+
+<div th:replace="common/common-bar::#header"></div>
+
+<div class="dashboard-banner">
+    <div class="container">
+        <div class="dashboard-head text-center">
+            <h3>用户管理中心</h3>
+            <p>管理系统中的所有用户账户、角色和权限</p>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12">
+                <div th:replace="common/common-bar::#dashboard-sidebar(cur='users')"></div>
+            </div>
+            <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
+                <div class="dashboard-content">
+                    <!-- 统计卡片 -->
+                    <div class="stats-cards">
+                        <div class="stat-card all-users">
+                            <div class="icon">
+                                <i class="fa fa-users"></i>
+                            </div>
+                            <div class="number" th:text="${userPage.total}">0</div>
+                            <div class="label">总用户数</div>
+                        </div>
+                        <div class="stat-card doctors">
+                            <div class="icon">
+                                <i class="fa fa-user-md"></i>
+                            </div>
+                            <div class="number" th:with="count=0" th:text="${#aggregates.sum(userPage.records.![userType == 1 ? 1 : 0])}">0</div>
+                            <div class="label">全科医生</div>
+                        </div>
+                        <div class="stat-card admins">
+                            <div class="icon">
+                                <i class="fa fa-shield"></i>
+                            </div>
+                            <div class="number" th:with="count=0" th:text="${#aggregates.sum(userPage.records.![roleStatus == 1 ? 1 : 0])}">0</div>
+                            <div class="label">管理员</div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-list-box">
+                        <div class="dashboard-title">
+                            <h4 class="mb-0">用户列表</h4>
+                            <span class="user-count">共 <strong th:text="${userPage.total}">0</strong> 个用户</span>
+                        </div>
+                        
+                        <!-- 使用传统表格布局 -->
+                        <div class="user-table-container">
+                            <table class="user-table">
+                                <thead>
+                                    <tr>
+                                        <th class="col-account">账号</th>
+                                        <th class="col-name">姓名</th>
+                                        <th class="col-age">性别/年龄</th>
+                                        <th class="col-type">用户类型</th>
+                                        <th class="col-role">角色状态</th>
+                                        <th class="col-audit">审核状态</th>
+                                        <th class="col-date">注册时间</th>
+                                        <th class="col-actions">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="user : ${userPage.records}">
+                                        <td class="col-account" th:text="${user.userAccount}">账号</td>
+                                        <td class="col-name" th:text="${user.userName}">姓名</td>
+                                        <td class="col-age">
+                                            <span th:text="${user.userSex}">性别</span> / 
+                                            <span th:text="${user.userAge}">年龄</span>
+                                        </td>
+                                        <td class="col-type">
+                                            <span class="badge" 
+                                                  th:classappend="${user.userType == 1 ? 'badge-doctor' : 'badge-user'}"
+                                                  th:text="${user.userType == 1 ? '全科医生' : '普通用户'}">
+                                            </span>
+                                        </td>
+                                        <td class="col-role">
+                                            <span class="badge" 
+                                                  th:classappend="${user.roleStatus == 1 ? 'badge-admin' : 'badge-normal'}"
+                                                  th:text="${user.roleStatus == 1 ? '管理员' : '普通用户'}">
+                                            </span>
+                                        </td>
+                                        <td class="col-audit">
+                                            <span class="badge" 
+                                                  th:if="${user.userType == 1}"
+                                                  th:classappend="${user.auditStatus == 0 ? 'badge-pending' : (user.auditStatus == 1 ? 'badge-approved' : 'badge-rejected')}"
+                                                  th:text="${user.auditStatus == 0 ? '待审核' : (user.auditStatus == 1 ? '已通过' : '已拒绝')}">
+                                            </span>
+                                            <span th:if="${user.userType == 0}" class="text-muted">-</span>
+                                        </td>
+                                        <td class="col-date" th:text="${#dates.format(user.createTime, 'yyyy-MM-dd HH:mm')}">注册时间</td>
+                                        <td class="col-actions">
+                                            <div class="action-buttons">
+                                                <!-- 普通用户或已审核医生 - 角色管理按钮 -->
+                                                <button th:if="${user.userType == 0 || (user.userType == 1 && user.auditStatus != 0)}" 
+                                                       class="btn-icon btn-role" 
+                                                       title="设置角色"
+                                                       th:data-userid="${user.id}"
+                                                       th:data-rolestatus="${user.roleStatus}"
+                                                       onclick="editUserRole(this.getAttribute('data-userid'), this.getAttribute('data-rolestatus'))">
+                                                    <i class="fa" th:classappend="${user.roleStatus == 1 ? 'fa-user-times' : 'fa-user-plus'}"></i>
+                                                </button>
+                                                
+                                                <!-- 医生用户 - 查看资质按钮 -->
+                                                <button th:if="${user.userType == 1 && !#strings.isEmpty(user.doctorQualificationImages)}" 
+                                                       class="btn-icon btn-view" 
+                                                       title="查看资质"
+                                                       th:data-images="${user.doctorQualificationImages}"
+                                                       onclick="viewQualifications(this.getAttribute('data-images'))">
+                                                    <i class="fa fa-eye"></i>
+                                                </button>
+                                                
+                                                <!-- 待审核医生 - 审核按钮 -->
+                                                <button th:if="${user.userType == 1 && user.auditStatus == 0}" 
+                                                       class="btn-icon btn-approve" 
+                                                       title="通过审核"
+                                                       th:data-userid="${user.id}"
+                                                       onclick="auditDoctor(this.getAttribute('data-userid'), 1)">
+                                                    <i class="fa fa-check"></i>
+                                                </button>
+                                                
+                                                <button th:if="${user.userType == 1 && user.auditStatus == 0}" 
+                                                       class="btn-icon btn-reject" 
+                                                       title="拒绝审核"
+                                                       th:data-userid="${user.id}"
+                                                       onclick="auditDoctor(this.getAttribute('data-userid'), 2)">
+                                                    <i class="fa fa-times"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr th:if="${userPage.records.size() == 0}">
+                                        <td colspan="8" class="text-center">
+                                            <div class="no-data">
+                                                <i class="fa fa-inbox"></i>
+                                                <p>暂无用户数据</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 分页 -->
+                    <div class="pagination-box">
+                        <div class="pagination">
+                            <a href="#" th:if="${userPage.current > 1}" th:href="@{/users(page=1,size=${userPage.size})}">
+                                <i class="fa fa-angle-double-left"></i>
+                            </a>
+                            <a href="#" th:if="${userPage.current > 1}" th:href="@{/users(page=${userPage.current-1},size=${userPage.size})}">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a th:each="i : ${#numbers.sequence(1, userPage.pages)}"
+                               th:href="@{/users(page=${i},size=${userPage.size})}"
+                               th:text="${i}"
+                               th:class="${i == userPage.current ? 'active' : ''}"></a>
+                            <a href="#" th:if="${userPage.current < userPage.pages}" th:href="@{/users(page=${userPage.current+1},size=${userPage.size})}">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                            <a href="#" th:if="${userPage.current < userPage.pages}" th:href="@{/users(page=${userPage.pages},size=${userPage.size})}">
+                                <i class="fa fa-angle-double-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="common/common-bar::#back"></div>
+<div th:replace="common/common-bar::#footer"></div>
+<div th:replace="common/common-bar::#search"></div>
+<div th:replace="common/common-bar::#back-to-top"></div>
+
+<script src="assets/js/jquery-3.5.1.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
+<script src="assets/js/plugin.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/custom-nav.js"></script>
+<script src="assets/js/jpanelmenu.min.js"></script>
+<script src="assets/js/dashboard-custom.js"></script>
+<script src="common/utils/reg.js"></script>
+<script src="common/layer/layer.js"></script>
+<script src="common/custom.js"></script>
+
+<script>
+    /**
+     * 审核医生账号
+     */
+    function auditDoctor(userId, status) {
+        let statusText = status == 1 ? "通过" : "拒绝";
+        
+        layer.confirm('确定要' + statusText + '此医生的审核申请吗?', {
+            btn: ['确定', '取消'],
+            skin: 'layui-layer-molv'
+        }, function() {
+            $.ajax({
+                type: "POST",
+                url: "user/auditDoctor",
+                data: {
+                    userId: userId,
+                    auditStatus: status
+                },
+                dataType: "json",
+                success: function(data) {
+                    if (data.code === 'SUCCESS') {
+                        layer.msg(statusText + '成功', {icon: 1});
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        layer.msg(data.message || '操作失败', {icon: 2});
+                    }
+                },
+                error: function() {
+                    layer.msg('服务器错误，请稍后再试', {icon: 2});
+                }
+            });
+        });
+    }
+    
+    /**
+     * 修改用户角色
+     */
+    function editUserRole(userId, roleStatus) {
+        // 计算新的角色状态（切换）
+        var newRoleStatus = roleStatus == 1 ? 0 : 1;
+        var roleText = newRoleStatus == 1 ? "管理员" : "普通用户";
+        
+        layer.confirm('确定要将此用户角色修改为' + roleText + '吗?', {
+            btn: ['确定', '取消'],
+            skin: 'layui-layer-molv'
+        }, function() {
+            $.ajax({
+                type: "POST",
+                url: "user/updateRole",
+                data: {
+                    userId: userId,
+                    roleStatus: newRoleStatus
+                },
+                dataType: "json",
+                success: function(data) {
+                    if (data.code === 'SUCCESS') {
+                        layer.msg('角色修改成功', {icon: 1});
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        layer.msg(data.message || '操作失败', {icon: 2});
+                    }
+                },
+                error: function() {
+                    layer.msg('服务器错误，请稍后再试', {icon: 2});
+                }
+            });
+        });
+    }
+    
+    /**
+     * 查看医生资质证明
+     */
+    function viewQualifications(qualifications) {
+        if (!qualifications) {
+            layer.msg('没有上传资质证明');
+            return;
+        }
+        
+        const paths = qualifications.split(',');
+        let html = '<div class="qualification-gallery">';
+        
+        paths.forEach(path => {
+            html += `<div class="qualification-item">
+                <img src="${path}" alt="医生资质证明" style="max-width: 100%;">
+            </div>`;
+        });
+        
+        html += '</div>';
+        
+        layer.open({
+            type: 1,
+            title: '医生资质证明',
+            area: ['80%', '80%'],
+            content: html,
+            shadeClose: true
+        });
+    }
+</script>
+
+</body>
+</html> 

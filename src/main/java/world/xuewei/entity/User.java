@@ -3,6 +3,7 @@ package world.xuewei.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -69,9 +70,24 @@ public class User {
     private Integer roleStatus;
 
     /**
+     * 用户类型，0普通用户，1全科医生
+     */
+    private Integer userType;
+
+    /**
      * 图片的地址
      */
     private String imgPath;
+
+    /**
+     * 医生资质证明图片路径，多个图片以逗号分隔
+     */
+    private String doctorQualificationImages;
+
+    /**
+     * 审核状态：0-待审核，1-已通过，2-已拒绝
+     */
+    private Integer auditStatus;
 
     /**
      * 创建时间
@@ -82,5 +98,11 @@ public class User {
      * 更新时间
      */
     private Date updateTime;
+
+    /**
+     * 是否已挂号
+     */
+    @TableField(exist = false)
+    private Boolean isRegistered = false;
 
 }

@@ -39,6 +39,7 @@ function register() {
     let userTel = $('#userTel').val();
     let userAge = $('#userAge').val();
     let userSex = $('#userSex').find("option:selected").val();
+    let userType = $('#userType').find("option:selected").val();
     let userEmail = $('#userEmail').val();
     let code = $('#code').val();
 
@@ -46,29 +47,62 @@ function register() {
         layer.msg("请完整填写信息");
         return;
     }
-
-    $.ajax({
-        type: "POST",
-        url: "login/register",
-        data: {
-            userAccount: userAccount,
-            userName: userName,
-            userPwd: userPwd,
-            userTel: userTel,
-            userAge: userAge,
-            userSex: userSex,
-            userEmail: userEmail,
-            code: code,
-        },
-        dataType: "json",
-        success: function (data) {
-            layer.msg(data['message']);
-            if (data['code'] === 'SUCCESS') {
-                setTimeout('reload()', 2000);
-            }
-        }
+    
+    // 如果是医生，检查资质图片
+    if (userType === "1" && $('#qualification-files')[0].files.length === 0) {
+        layer.msg("请上传医生资质证明");
+        return;
+    }
+    
+    // 显示加载中
+    const loadingIndex = layer.load(1, {
+        shade: [0.1, '#fff']
     });
-
+    
+    // 处理逻辑：先上传图片，再提交表单
+    const registerUser = (qualificationImages) => {
+        $.ajax({
+            type: "POST",
+            url: "login/register",
+            data: {
+                userAccount: userAccount,
+                userName: userName,
+                userPwd: userPwd,
+                userTel: userTel,
+                userAge: userAge,
+                userSex: userSex,
+                userType: userType,
+                userEmail: userEmail,
+                code: code,
+                doctorQualificationImages: qualificationImages
+            },
+            dataType: "json",
+            success: function (data) {
+                layer.close(loadingIndex);
+                layer.msg(data['message']);
+                if (data['code'] === 'SUCCESS') {
+                    setTimeout('reload()', 2000);
+                }
+            },
+            error: function() {
+                layer.close(loadingIndex);
+                layer.msg('注册失败，请稍后重试');
+            }
+        });
+    };
+    
+    // 根据用户类型，决定是否需要上传资质图片
+    if (userType === "1") {
+        uploadQualificationImages()
+            .then(imagePaths => {
+                registerUser(imagePaths);
+            })
+            .catch(() => {
+                layer.close(loadingIndex);
+            });
+    } else {
+        registerUser('');
+    }
 }
 
 /**
@@ -553,5 +587,130 @@ function searchMedicine() {
     let href = window.location.href;
     href = href.split("/")[0] + "/findMedicines?nameValue="+content;
     reloadToGO(href);
+}
+
+/**
+ * 切换医生资质上传区域显示/隐藏
+ */
+function toggleQualificationUpload() {
+    let userType = $('#userType').val();
+    if (userType === "1") {
+        $('#qualificationUploadArea').slideDown();
+    } else {
+        $('#qualificationUploadArea').slideUp();
+    }
+}
+
+/**
+ * 预览选择的资质图片
+ */
+function previewQualificationImages(input) {
+    const maxFiles = 5;
+    const files = input.files;
+    
+    // 检查文件数量限制
+    if (files.length > maxFiles) {
+        layer.msg(`最多只能上传${maxFiles}张图片`);
+        input.value = '';
+        return;
+    }
+    
+    // 清空预览区域
+    const previewArea = $('#qualification-previews');
+    previewArea.empty();
+    
+    // 预览每张图片
+    for (let i = 0; i < files.length; i++) {
+        let file = files[i];
+        
+        // 检查文件类型
+        if (!file.type.startsWith('image/')) {
+            layer.msg('请上传图片文件');
+            input.value = '';
+            previewArea.empty();
+            return;
+        }
+        
+        // 创建预览元素
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            let preview = `
+                <div class="position-relative" style="width: 100px; height: 100px;">
+                    <img src="${e.target.result}" class="img-thumbnail" style="width: 100%; height: 100%; object-fit: cover;">
+                    <button type="button" class="btn btn-sm btn-danger position-absolute" style="top: 0; right: 0; padding: 0 5px;" onclick="removePreview(this, ${i})">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+            `;
+            previewArea.append(preview);
+        }
+        reader.readAsDataURL(file);
+    }
+}
+
+/**
+ * 移除预览图片
+ */
+function removePreview(button, index) {
+    // 移除预览图片
+    $(button).parent().remove();
+    
+    // 从input中移除文件
+    // 注意：由于无法直接修改FileList，这里使用一个技巧：创建新的 DataTransfer 对象
+    const fileInput = document.getElementById('qualification-files');
+    const dt = new DataTransfer();
+    
+    const files = fileInput.files;
+    for (let i = 0; i < files.length; i++) {
+        if (i !== index) {
+            dt.items.add(files[i]);
+        }
+    }
+    
+    fileInput.files = dt.files;
+}
+
+/**
+ * 上传医生资质图片
+ * @returns {Promise} 包含上传图片路径的Promise
+ */
+function uploadQualificationImages() {
+    return new Promise((resolve, reject) => {
+        const files = $('#qualification-files')[0].files;
+        if (files.length === 0) {
+            resolve('');
+            return;
+        }
+        
+        // 创建FormData对象
+        const formData = new FormData();
+        for (let i = 0; i < files.length; i++) {
+            formData.append("files", files[i]);
+        }
+        
+        // 上传文件
+        $.ajax({
+            type: "POST",
+            url: "file/uploadMultiple",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.code === 'SUCCESS') {
+                    // 图片路径以逗号分隔
+                    const imagePaths = response.data.join(',');
+                    $('#doctorQualificationImages').val(imagePaths);
+                    resolve(imagePaths);
+                } else {
+                    layer.msg(response.message);
+                    reject(response.message);
+                }
+            },
+            error: function(error) {
+                layer.msg('上传图片失败');
+                reject(error);
+            }
+        });
+    });
 }
 

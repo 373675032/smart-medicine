@@ -308,4 +308,28 @@ public class SystemController extends BaseController<User> {
         map.put("news", news);
         return "add-health-science";
     }
+
+    /**
+     * 用户管理页面
+     */
+    @GetMapping("/users")
+    public String users(Map<String, Object> map,
+                       @RequestParam(value = "page", defaultValue = "1") Integer page,
+                       @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        if (Assert.isEmpty(loginUser)) {
+            return "redirect:/index.html";
+        }
+        // 验证当前用户是否为管理员
+        if (loginUser.getRoleStatus() != 1) {
+            return "redirect:/index.html";
+        }
+        
+        // 获取分页用户列表
+        Page<User> pageParam = new Page<>(page, size);
+        IPage<User> userPage = userService.page(pageParam, null);
+        
+        map.put("userPage", userPage);
+        map.put("cur", "users");
+        return "users";
+    }
 }

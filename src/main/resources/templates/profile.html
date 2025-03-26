@@ -101,6 +101,23 @@
                                                 <div class="row">
                                                     <div class="col-6">
                                                         <div class="form-group">
+                                                            <label>用户类型</label>
+                                                            <input disabled style="background: #ecf0f1"
+                                                                   th:value="${session.loginUser.userType == 1 ? '全科医生' : '普通用户'}" type="text"/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="form-group">
+                                                            <label>账户状态</label>
+                                                            <input disabled style="background: #ecf0f1"
+                                                                   th:value="${session.loginUser.roleStatus == 1 ? '管理员' : '普通用户'}" type="text"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <div class="form-group">
                                                             <label>邮箱</label>
                                                             <input style="background: #ecf0f1" disabled
                                                                    th:value="${session.loginUser.userEmail}"
