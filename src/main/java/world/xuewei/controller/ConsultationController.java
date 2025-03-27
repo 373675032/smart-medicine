@@ -11,13 +11,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import world.xuewei.dto.RespResult;
+import world.xuewei.entity.ChatMessage;
 import world.xuewei.entity.DoctorRegistration;
 import world.xuewei.entity.User;
+import world.xuewei.service.ChatMessageService;
 import world.xuewei.service.DoctorRegistrationService;
 import world.xuewei.service.UserService;
 
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -37,6 +41,9 @@ public class ConsultationController {
     
     @Autowired
     private HttpSession session;
+
+    @Autowired
+    private ChatMessageService chatMessageService;
 
     /**
      * 在线问诊页面 - 显示审核通过的医生列表
@@ -113,7 +120,7 @@ public class ConsultationController {
     /**
      * 医生聊天页面
      */
-    @GetMapping("/consultation/chat")
+    @GetMapping("/consultation-chat")
     public String doctorChat(Model model, 
                            @RequestParam("doctorId") Integer doctorId,
                            @RequestParam("doctorName") String doctorName) {
@@ -122,8 +129,9 @@ public class ConsultationController {
             return "redirect:/login";
         }
         
-        // 检查是否已挂号
+        // 检查是否已挂号或挂号是否有效
         if (!doctorRegistrationService.isRegistered(loginUser.getId(), doctorId)) {
+            model.addAttribute("message", "您的挂号已过期或尚未挂号，请重新挂号");
             return "redirect:/consultation";
         }
         
@@ -133,5 +141,86 @@ public class ConsultationController {
         model.addAttribute("user", loginUser);
         
         return "doctor-chat";
+    }
+
+    /**
+     * 发送消息给医生
+     */
+    @PostMapping("/consultation-send")
+    @ResponseBody
+    public RespResult sendMessage(@RequestParam("doctorId") Integer doctorId,
+                                 @RequestParam("content") String content) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) {
+            return RespResult.fail("请先登录");
+        }
+        
+        // 检查是否已挂号
+        if (!doctorRegistrationService.isRegistered(loginUser.getId(), doctorId)) {
+            return RespResult.fail("您尚未挂号该医生");
+        }
+        
+        // 创建新消息
+        ChatMessage message = new ChatMessage();
+        message.setUserId(loginUser.getId());
+        message.setDoctorId(doctorId);
+        message.setContent(content);
+        message.setFromDoctor(false); // 用户发送的消息
+        message.setCreateTime(new Date());
+        message.setIsRead(false); // 标记为未读
+        
+        // 保存消息
+        chatMessageService.save(message);
+        
+        Map<String, Object> data = new HashMap<>();
+        data.put("messageId", message.getId());
+        
+        return RespResult.success("消息发送成功", data);
+    }
+
+    /**
+     * 获取与医生的聊天记录
+     */
+    @GetMapping("/consultation-messages")
+    @ResponseBody
+    public RespResult getMessages(@RequestParam("doctorId") Integer doctorId,
+                                 @RequestParam(value = "lastMessageId", defaultValue = "0") Integer lastMessageId) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) {
+            return RespResult.fail("请先登录");
+        }
+        
+        // 查询新消息
+        List<ChatMessage> messages = chatMessageService.getNewMessages(loginUser.getId(), doctorId, lastMessageId);
+        
+        Map<String, Object> data = new HashMap<>();
+        data.put("messages", messages);
+        
+        return RespResult.success("获取成功", data);
+    }
+
+    /**
+     * 模拟医生回复（实际系统中应由医生端发送）
+     */
+    private ChatMessage simulateDoctorReply(Integer doctorId, Integer userId, String userMessage) {
+        // 获取医生信息
+        User doctor = userService.getById(doctorId);
+        
+        // 创建医生回复消息
+        ChatMessage replyMessage = new ChatMessage();
+        replyMessage.setUserId(userId);
+        replyMessage.setDoctorId(doctorId);
+        replyMessage.setFromDoctor(true);
+        replyMessage.setCreateTime(new Date());
+        
+        // 这里可以接入AI服务或简单回复
+        String reply = "您好，我是" + doctor.getUserName() + "医生。我已收到您的消息：\"" + userMessage + 
+                       "\"。请稍等，我正在分析您的情况...";
+        replyMessage.setContent(reply);
+        
+        // 保存回复消息
+        chatMessageService.save(replyMessage);
+        
+        return replyMessage;
     }
 } 

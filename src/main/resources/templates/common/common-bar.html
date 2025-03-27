@@ -7,111 +7,7 @@
     <link rel="stylesheet" href="common/font-awesome/css/font-awesome.min.css">
     <style>
         /* 导航栏样式优化 */
-        .navbar-nav {
-            display: flex;
-            align-items: center;
-            gap: 2rem !important;  /* 减小导航项之间的间距 */
-        }
 
-        .navbar-nav > li > a {
-            font-size: 16px;
-            color: #333;
-            text-align: center;
-            line-height: 1.5;
-            padding: 10px 5px;
-            display: flex;
-            flex-direction: column;  /* 文字垂直排列 */
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-        }
-        
-        /* 统一导航项高度和宽度 */
-        .navbar-nav > li {
-            height: 60px;
-            display: flex;
-            align-items: center;
-        }
-        
-        /* 增加导航区域宽度 */
-        .navbar-collapse1 {
-            width: 60% !important; /* 增加宽度占比 */
-            display: flex;
-            justify-content: center; /* 中心对齐导航项 */
-        }
-        
-        .navbar-header {
-            width: 15% !important; /* 减小logo区域宽度 */
-        }
-
-        /* Logo样式 */
-        .navbar-brand {
-            padding-right: 1rem;
-        }
-
-        /* 右侧登录区域样式 */
-        .header-btn {
-            margin-left: 0.5rem; /* 减小外边距 */
-        }
-
-        .header-btn input {
-            margin: 0 5px;
-            height: 36px;
-            width: 120px; /* 固定宽度 */
-        }
-        
-        /* 右侧登录区域容器 */
-        .login-container {
-            width: 25%; /* 分配宽度给登录区域 */
-            display: flex;
-            justify-content: flex-end;
-        }
-        
-        /* 统一最后一个导航项样式 */
-        .navbar-nav > li:last-child > a {
-            display: flex;
-            flex-direction: column; /* 保持垂直排列一致性 */
-            align-items: center;
-        }
-        
-        /* 导航容器样式 */
-        .navbar-flex {
-            padding: 0 10px;
-            height: 80px;
-        }
-        
-        /* 响应式调整 */
-        @media (max-width: 1200px) {
-            .navbar-nav {
-                gap: 1rem !important;
-            }
-            
-            .header-btn input {
-                width: 100px;
-            }
-            
-            .navbar-collapse1 {
-                width: 55% !important;
-            }
-        }
-        
-        @media (max-width: 992px) {
-            .navbar-header {
-                width: 12% !important;
-            }
-            
-            .navbar-collapse1 {
-                width: 50% !important;
-            }
-            
-            .header-btn {
-                margin-left: 0.3rem;
-            }
-            
-            .header-btn input {
-                width: 80px;
-            }
-        }
     </style>
 </head>
 <body>
@@ -153,7 +49,7 @@
                             <li><a href="first-aid"><span>急救</span><span>指南</span></a></li>
                             <li><a href="doctor"><span>智能</span><span>医生</span></a></li>
                             <li>
-                                <a href="consultation">
+                                <a th:href="${session.loginUser != null && session.loginUser.userType == 1 ? '/doctor-consultation' : '/consultation'}">
                                     <span><i class="fa fa-stethoscope"></i></span>
                                     <span>在线问诊</span>
                                 </a>
@@ -303,7 +199,7 @@
         <div class="author-news mb-3">
             <div class="author-news-content text-center p-3">
                 <div class="author-thumb mt-0">
-                    <img th:src="${session.loginUser.imgPath}" alt="author"/>
+                    <img th:src="${session.loginUser.imgPath != null ? session.loginUser.imgPath : '/assets/images/default.jpg'}" alt="author"/>
                 </div>
                 <div class="author-content pt-2 p-0">
                     <h3 class="mb-1" th:text="${session.loginUser.userName}"></h3>
@@ -344,7 +240,9 @@
                     <a href="all-first-aid"><i class="sl sl-icon-layers"></i> 急救指南管理</a>
                 </li>
                 <li th:class="${cur == 'consultation' ? 'active': ''}">
-                    <a href="consultation"><i class="sl sl-icon-user-following"></i> 在线问诊</a>
+                    <a th:href="${session.loginUser != null && session.loginUser.userType == 1 ? '/doctor-consultation' : '/consultation'}">
+                        <i class="sl sl-icon-user-following"></i> 在线问诊
+                    </a>
                 </li>
                 <li>
                     <a href="logout"><i class="sl sl-icon-power"></i> 退出登录</a>
@@ -354,6 +252,12 @@
     </div>
 </div>
 
+<!-- 调试信息 -->
+<div style="display:none">
+  用户类型: [[${session.loginUser != null ? session.loginUser.userType : 'null'}]]
+  是否医生: [[${session.loginUser != null && session.loginUser.userType == 1}]]
+  链接应该是: [[${session.loginUser != null && session.loginUser.userType == 1 ? '/doctor-consultation' : '/consultation'}]]
+</div>
 
 </body>
 </html>

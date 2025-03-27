@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zxx" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>医生聊天页面 - 智慧医药系统</title>
+
+    <link rel="shortcut icon" type="image/x-icon" href="../assets/images/cropped-favicon-32x32.png"/>
+    <link href="../assets/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="../assets/css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="../assets/css/plugin.css" rel="stylesheet" type="text/css"/>
+    <link href="../assets/css/dashboard.css" rel="stylesheet" type="text/css"/>
+    <link href="../assets/fonts/flaticon.css" rel="stylesheet" type="text/css"/>
+    <link href="../assets/css/icons.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="../assets/fonts/line-icons.css" type="text/css"/>
+    <link rel="stylesheet" href="../common/font-awesome/css/font-awesome.min.css">
+    
+    <style>
+        /* 全局布局调整 */
+        .dashboard-content {
+            padding: 0;
+            display: flex;
+            height: calc(100vh - 160px);
+            overflow: hidden;
+        }
+        
+        /* 患者列表侧边栏样式 */
+        .patient-list-sidebar {
+            width: 120px;
+            background: #fff;
+            border-right: 1px solid #eee;
+            height: 100%;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            background-color: #f8f9fa;
+        }
+        
+        .sidebar-header h5 {
+            margin: 0;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .patient-list {
+            padding: 0;
+        }
+        
+        .patient-item {
+            position: relative;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        
+        .patient-item a {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #333;
+        }
+        
+        .patient-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .patient-item.active {
+            background-color: #e6f7ff;
+            border-right: 3px solid #1890ff;
+        }
+        
+        .patient-avatar {
+            position: relative;
+            margin: 0 0;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            overflow: hidden;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .patient-avatar img {
+            width: 100%;
+        }
+        
+        .unread-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #f5222d;
+            color: white;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .patient-info {
+            flex-grow: 1;
+            overflow: hidden;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .patient-info h6 {
+            margin: 0 0 5px;
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .patient-info .patient-meta {
+            color: #666;
+            font-size: 12px;
+            display: block;
+        }
+        
+        /* 聊天区域样式 */
+        .chat-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+        }
+        
+        .chat-header .patient-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .chat-header .patient-info {
+            margin-left: 10px;
+            color: #666;
+        }
+        
+        .message-container {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .message-row {
+            margin-bottom: 12px;
+            display: flex;
+        }
+        
+        .message-row.from-doctor {
+            justify-content: flex-end;
+        }
+        
+        .message-bubble {
+            max-width: 70%;
+            padding: 8px 10px;
+            border-radius: 12px;
+            position: relative;
+        }
+        
+        .message-row.from-doctor .message-bubble {
+            background-color: #dcf8c6;
+            border-top-right-radius: 0;
+        }
+        
+        .message-row.from-patient .message-bubble {
+            background-color: #f1f0f0;
+            border-top-left-radius: 0;
+        }
+        
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin: 0 8px;
+        }
+        
+        .message-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .message-content {
+            word-wrap: break-word;
+            line-height: 1.4;
+            margin-bottom: 3px;
+            padding: 2px;
+        }
+        
+        .message-time {
+            font-size: 10px;
+            color: #999;
+            margin-top: 2px;
+            text-align: right;
+        }
+        
+        .message-input-container {
+            padding: 15px;
+            border-top: 1px solid #eee;
+            background-color: #f8f9fa;
+        }
+        
+        .message-input-container textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: none;
+            height: 80px;
+        }
+        
+        .message-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+        
+        .send-btn {
+            background-color: #1890ff;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .send-btn:hover {
+            background-color: #40a9ff;
+        }
+        
+        @media (max-width: 992px) {
+            .dashboard-content {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .patient-list-sidebar {
+                width: 100%;
+                height: 200px;
+                border-right: none;
+                border-bottom: 1px solid #eee;
+            }
+            
+            .chat-container {
+                height: calc(100vh - 360px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="preloader">
+    <div id="status"></div>
+</div>
+
+<div th:replace="common/common-bar::#header"></div>
+
+<div class="dashboard-banner">
+    <div class="container">
+        <div class="dashboard-head text-center">
+            <h3>医生在线问诊</h3>
+            <p>与患者进行实时医疗咨询</p>
+        </div>
+    </div>
+</div>
+
+<div id="dashboard">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12">
+                <div th:replace="common/common-bar::#dashboard-sidebar(cur='consultation')"></div>
+            </div>
+            <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
+                <div class="dashboard-content">
+                    <!-- 患者列表侧边栏 -->
+                    <div class="patient-list-sidebar">
+                        <div class="sidebar-header">
+                            <h5>患者列表</h5>
+                        </div>
+                        <div class="patient-list">
+                            <div th:each="p : ${allPatients}" 
+                                 th:class="${p.id == patient.id ? 'patient-item active' : 'patient-item'}">
+                                <a th:href="@{/doctor-chat(patientId=${p.id})}">
+                                    <div class="patient-avatar">
+                                        <img th:src="${p.imgPath != null ? p.imgPath : '../assets/images/default.jpg'}" alt="患者头像">
+                                        <span th:if="${unreadCounts.get(p.id) > 0}" class="unread-badge" 
+                                              th:text="${unreadCounts.get(p.id)}"></span>
+                                    </div>
+                                    <div class="patient-info">
+                                        <h6 th:text="${p.userName}">患者姓名</h6>
+                                        <span class="patient-meta" th:text="${p.userSex + ' / ' + p.userAge + '岁'}">性别/年龄</span>
+                                    </div>
+                                </a>
+                            </div>
+                            
+                            <!-- 无患者时显示 -->
+                            <div th:if="${allPatients.size() == 0}" class="text-center p-4">
+                                <i class="fa fa-user-o mb-2" style="font-size: 24px; color: #ddd;"></i>
+                                <p style="color: #999;">暂无患者预约</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 聊天区域 -->
+                    <div class="chat-container">
+                        <!-- 聊天头部 -->
+                        <div class="chat-header">
+                            <div class="patient-avatar" style="width: 40px; height: 40px;">
+                                <img th:src="${patient.imgPath != null ? patient.imgPath : '../assets/images/default.jpg'}" alt="患者头像">
+                            </div>
+                            <div>
+                                <h4 class="patient-name" th:text="${patient.userName}">患者姓名</h4>
+                                <span class="patient-info" th:text="${patient.userSex + ' / ' + patient.userAge + '岁'}">性别/年龄</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 消息容器 -->
+                        <div id="messageContainer" class="message-container">
+                            <!-- 欢迎消息 -->
+                            <div class="message-row from-doctor" th:if="${messages.size() == 0}">
+                                <div class="message-bubble">
+                                    <div class="message-content">
+                                        您好，[[${patient.userName}]]，我是您的主治医生[[${doctor.userName}]]。有什么可以帮助您的吗？
+                                    </div>
+                                    <div class="message-time">现在</div>
+                                </div>
+                                <div class="message-avatar">
+                                    <img th:src="${doctor.imgPath != null ? doctor.imgPath : '../assets/images/default.jpg'}" alt="医生头像">
+                                </div>
+                            </div>
+                            
+                            <!-- 历史消息 -->
+                            <div th:each="msg : ${messages}" 
+                                 th:class="${msg.fromDoctor ? 'message-row from-doctor' : 'message-row from-patient'}">
+                                
+                                <!-- 如果是患者发送的消息 -->
+                                <div th:if="${!msg.fromDoctor}" class="message-avatar">
+                                    <img th:src="${patient.imgPath != null ? patient.imgPath : '../assets/images/default.jpg'}" alt="患者头像">
+                                </div>
+                                
+                                <div class="message-bubble">
+                                    <div class="message-content" th:text="${msg.content}">
+                                        消息内容
+                                    </div>
+                                    <div class="message-time" th:text="${#dates.format(msg.createTime, 'MM-dd HH:mm')}">
+                                        发送时间
+                                    </div>
+                                </div>
+                                
+                                <!-- 如果是医生发送的消息 -->
+                                <div th:if="${msg.fromDoctor}" class="message-avatar">
+                                    <img th:src="${doctor.imgPath != null ? doctor.imgPath : '../assets/images/default.jpg'}" alt="医生头像">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 消息输入区域 -->
+                        <div class="message-input-container">
+                            <textarea id="messageInput" placeholder="输入回复内容..."></textarea>
+                            <div class="message-actions">
+                                <button id="sendButton" class="send-btn">
+                                    <i class="fa fa-paper-plane"></i> 发送
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="common/common-bar::#back"></div>
+<div th:replace="common/common-bar::#footer"></div>
+<div th:replace="common/common-bar::#search"></div>
+<div th:replace="common/common-bar::#back-to-top"></div>
+
+<script src="../assets/js/jquery-3.5.1.min.js"></script>
+<script src="../assets/js/bootstrap.min.js"></script>
+<script src="../assets/js/plugin.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/custom-nav.js"></script>
+<script src="../assets/js/jpanelmenu.min.js"></script>
+<script src="../assets/js/dashboard-custom.js"></script>
+<script src="../common/utils/reg.js"></script>
+<script src="../common/layer/layer.js"></script>
+<script src="../common/custom.js"></script>
+
+<script th:inline="javascript">
+    // 获取Thymeleaf变量
+    var patientId = /*[[${patient != null ? patient.id : 0}]]*/ 0;
+    var doctorId = /*[[${doctor != null ? doctor.id : 0}]]*/ 0;
+    var doctorImgPath = /*[[${doctor != null && doctor.imgPath != null ? doctor.imgPath : '../assets/images/default.jpg'}]]*/ '../assets/images/default.jpg';
+    var patientImgPath = /*[[${patient != null && patient.imgPath != null ? patient.imgPath : '../assets/images/default.jpg'}]]*/ '../assets/images/default.jpg';
+    var lastMessageId = 0; // 跟踪最后一条消息的ID
+    
+    $(document).ready(function() {
+        // 初始化滚动到底部
+        scrollToBottom();
+        
+        // 初始化最后消息ID
+        initLastMessageId();
+        
+        // 绑定发送按钮事件
+        $("#sendButton").click(function() {
+            sendMessage();
+        });
+        
+        // 绑定回车键发送消息
+        $("#messageInput").keydown(function(event) {
+            if (event.keyCode === 13 && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        // 立即检查一次消息
+        checkNewMessages();
+        
+        // 定期检查新消息 - 缩短检查间隔为3秒，提高实时性
+        setInterval(checkNewMessages, 3000);
+    });
+    
+    // 初始化最后消息ID
+    function initLastMessageId() {
+        // 获取页面上所有消息，找出最后一条的ID
+        var messages = /*[[${messages}]]*/ [];
+        if (messages && messages.length > 0) {
+            lastMessageId = messages[messages.length - 1].id;
+            console.log("初始化lastMessageId: " + lastMessageId);
+        }
+    }
+    
+    // 滚动到底部
+    function scrollToBottom() {
+        var container = document.getElementById('messageContainer');
+        container.scrollTop = container.scrollHeight;
+    }
+    
+    // 发送消息
+    function sendMessage() {
+        var content = $("#messageInput").val().trim();
+        if (!content) {
+            return;
+        }
+        
+        // 清空输入框
+        $("#messageInput").val("");
+        
+        // 发送消息到服务器
+        $.ajax({
+            type: "POST",
+            url: "../doctor-reply",
+            data: {
+                patientId: patientId,
+                content: content
+            },
+            dataType: "json",
+            success: function(response) {
+                if (response.code === 'SUCCESS') {
+                    // 发送成功后在界面上添加消息
+                    addMessage(content, true);
+                    
+                    // 更新lastMessageId
+                    if (response.data && response.data.messageId) {
+                        lastMessageId = response.data.messageId;
+                        console.log("发送消息后更新lastMessageId: " + lastMessageId);
+                    }
+                } else {
+                    layer.msg(response.message || '消息发送失败', {icon: 2});
+                }
+            },
+            error: function() {
+                layer.msg('服务器错误，请稍后重试', {icon: 2});
+            }
+        });
+    }
+    
+    // 添加消息到聊天区域
+    function addMessage(content, isFromDoctor) {
+        var now = new Date();
+        var timeString = formatTime(now);
+        
+        var messageHtml = '';
+        if (isFromDoctor) {
+            messageHtml = 
+                '<div class="message-row from-doctor">' +
+                '    <div class="message-bubble">' +
+                '        <div class="message-content">' + escapeHtml(content) + '</div>' +
+                '        <div class="message-time">' + timeString + '</div>' +
+                '    </div>' +
+                '    <div class="message-avatar">' +
+                '        <img src="' + doctorImgPath + '" alt="医生头像">' +
+                '    </div>' +
+                '</div>';
+        } else {
+            messageHtml = 
+                '<div class="message-row from-patient">' +
+                '    <div class="message-avatar">' +
+                '        <img src="' + patientImgPath + '" alt="患者头像">' +
+                '    </div>' +
+                '    <div class="message-bubble">' +
+                '        <div class="message-content">' + escapeHtml(content) + '</div>' +
+                '        <div class="message-time">' + timeString + '</div>' +
+                '    </div>' +
+                '</div>';
+        }
+        
+        $("#messageContainer").append(messageHtml);
+        scrollToBottom();
+    }
+    
+    // 检查新消息
+    function checkNewMessages() {
+        console.log("检查新消息，参数：", {
+            doctorId: doctorId,
+            patientId: patientId,
+            lastMessageId: lastMessageId
+        });
+        
+        $.ajax({
+            type: "GET",
+            url: "../doctor-patient-messages",
+            data: {
+                patientId: patientId,
+                lastMessageId: lastMessageId
+            },
+            dataType: "json",
+            success: function(response) {
+                console.log("API响应:", response);
+                if (response.code === 'SUCCESS' && response.data && response.data.messages) {
+                    var newMessages = response.data.messages;
+                    console.log("收到 " + newMessages.length + " 条新消息");
+                    
+                    if (newMessages.length > 0) {
+                        // 显示新消息
+                        newMessages.forEach(function(msg) {
+                            // 由于是医生视角，只显示不是来自医生的消息
+                            if (!msg.fromDoctor) {
+                                addMessage(msg.content, false);
+                            }
+                            
+                            // 更新最后消息ID
+                            if (msg.id > lastMessageId) {
+                                lastMessageId = msg.id;
+                            }
+                        });
+                        
+                        console.log("更新后的lastMessageId: " + lastMessageId);
+                    }
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("API错误:", {
+                    status: status,
+                    error: error,
+                    response: xhr.responseText
+                });
+            }
+        });
+    }
+    
+    // 格式化时间
+    function formatTime(date) {
+        var hours = date.getHours();
+        var minutes = date.getMinutes();
+        
+        hours = hours < 10 ? '0' + hours : hours;
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        
+        return hours + ':' + minutes;
+    }
+    
+    // HTML转义，防止XSS攻击
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+</script>
+
+</body>
+</html> 

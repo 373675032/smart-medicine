@@ -475,7 +475,7 @@
                                         <td class="col-actions">
                                             <div class="action-buttons">
                                                 <!-- 普通用户或已审核医生 - 角色管理按钮 -->
-                                                <button th:if="${user.userType == 0 || (user.userType == 1 && user.auditStatus != 0)}" 
+                                                <button th:if="${(user.userType == 0 || (user.userType == 1 && user.auditStatus != 0)) && user.userAccount != 'admin'}" 
                                                        class="btn-icon btn-role" 
                                                        title="设置角色"
                                                        th:data-userid="${user.id}"

@@ -46,7 +46,7 @@
                                 <div class="message">
                                     <div class="message-header inbox-item">
                                         <div class="inbox-image">
-                                            <img th:src="${doctor.userAvatar != null ? doctor.userAvatar : 'assets/images/team/user-2.jpg'}" alt="image">
+                                            <img th:src="${doctor.imgPath != null ? doctor.imgPath : 'assets/images/team/user-2.jpg'}" alt="image">
                                         </div>
                                         <div class="inbox-content">
                                             <p th:text="${doctor.userName}">医生姓名</p>
@@ -57,7 +57,7 @@
                                         <div id="messages" style="height: 260px;overflow-y: auto">
                                             <div class="msg-received">
                                                 <div class="msg-image">
-                                                    <img th:src="${doctor.userAvatar != null ? doctor.userAvatar : 'assets/images/team/user-2.jpg'}" alt="image">
+                                                    <img th:src="${doctor.imgPath != null ? doctor.imgPath : 'assets/images/team/user-2.jpg'}" alt="image">
                                                 </div>
                                                 <div class="msg-content">
                                                     <p>现在</p>
@@ -110,58 +110,142 @@
     }
 </style>
 
-<script>
+<script th:inline="javascript">
+    /**
+     * 初始化消息区域
+     */
     function messageInit() {
         var scrollDiv = document.getElementById("messages");
         scrollDiv.scrollTop = scrollDiv.scrollHeight;
     }
     
-    // 页面加载完成后滚动到底部
+    // 页面加载完成后初始化
     $(document).ready(function() {
         messageInit();
+        
+        // 添加消息发送的快捷键功能
+        $('#message').keydown(function(event) {
+            if(event.keyCode == 13 && !event.shiftKey) {
+                event.preventDefault();
+                sendMessageToDoctor();
+            }
+        });
+        
+        // 定期检查是否有新消息
+        checkNewMessages();
     });
+    
+    // 记录最后一条消息的ID
+    var lastMessageId = 0;
     
     /**
      * 发送消息给医生
      */
     function sendMessageToDoctor() {
-        let message = $('#message').val();
-        if (!message) {
+        var content = $("#message").val().trim();
+        if (!content) {
             return;
         }
         
-        // 添加用户发送的消息
-        $('#messages').append("<div class='msg-received msg-sent' style=\"margin-right: 20px\"><div class='msg-content'><p>现在</p><p class='msg'>" + message + "</p></div></div>");
-        messageInit();
-        $('#message').val('');
+        // 清空输入框
+        $("#message").val("");
         
-        // 模拟医生回复
-        setTimeout(function() {
-            $.ajax({
-                type: "POST",
-                url: "../message/query",
-                data: {
-                    content: message,
-                },
-                dataType: "json",
-                success: function (data) {
-                    if (data['code'] === 'SUCCESS') {
-                        let reply = data['message'];
-                        $('#messages').append("<div class=\"msg-received\">\n" +
-                            "                   <div class=\"msg-image\">\n" +
-                            "                      <img src=\"../assets/images/team/user-2.jpg\" alt=\"image\">\n" +
-                            "                   </div>\n" +
-                            "                   <div class=\"msg-content\">\n" +
-                            "                      <p>现在</p>\n" +
-                            "                      <p class=\"msg\">\n" + reply +
-                            "                      </p>\n" +
-                            "                   </div>\n" +
-                            "                  </div>");
-                        messageInit();
-                    }
+        // 发送消息到服务器
+        $.ajax({
+            type: "POST",
+            url: "/consultation-send",
+            data: {
+                doctorId: doctorId,
+                content: content
+            },
+            dataType: "json",
+            success: function(response) {
+                if (response.code === 'SUCCESS') {
+                    // 消息已成功发送到服务器
+                    lastMessageId = response.data.messageId;
+                    
+                    // 触发检查新消息
+                    setTimeout(checkNewMessages, 1000);
+                } else {
+                    layer.msg(response.message || '消息发送失败', {icon: 2});
                 }
-            });
-        }, 1000);
+            },
+            error: function() {
+                layer.msg('服务器错误，请稍后重试', {icon: 2});
+            }
+        });
+    }
+    
+    /**
+     * 检查是否有新消息
+     */
+    function checkNewMessages() {
+        $.ajax({
+            type: "GET",
+            url: "/consultation-messages",
+            data: {
+                doctorId: doctorId,
+                lastMessageId: lastMessageId
+            },
+            dataType: "json",
+            success: function(response) {
+                if (response.code === 'SUCCESS' && response.data.messages.length > 0) {
+                    // 显示新消息
+                    response.data.messages.forEach(function(msg) {
+                        if (msg.fromDoctor) {
+                            // 医生发来的消息
+                            $('#messages').append("<div class=\"msg-received\">\n" +
+                                "                   <div class=\"msg-image\">\n" +
+                                "                      <img src=\"../assets/images/team/user-2.jpg\" alt=\"image\">\n" +
+                                "                   </div>\n" +
+                                "                   <div class=\"msg-content\">\n" +
+                                "                      <p>" + msg.createTime + "</p>\n" +
+                                "                      <p class=\"msg\">\n" + msg.content +
+                                "                      </p>\n" +
+                                "                   </div>\n" +
+                                "                  </div>");
+                        }
+                        lastMessageId = msg.id;
+                    });
+                    messageInit();
+                }
+                
+                // 继续轮询
+                setTimeout(checkNewMessages, 5000);
+            }
+        });
+    }
+    
+    /**
+     * 获取当前时间
+     */
+    function getCurrentTime() {
+        var now = new Date();
+        var h = now.getHours();
+        var m = now.getMinutes();
+        return (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m);
+    }
+    
+    /**
+     * 从URL获取参数
+     */
+    function getQueryParam(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return decodeURIComponent(r[2]); 
+        return null;
+    }
+    
+    /**
+     * HTML转义，防止XSS攻击
+     */
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
 </script>
 

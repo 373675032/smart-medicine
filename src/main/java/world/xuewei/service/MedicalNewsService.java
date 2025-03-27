@@ -8,7 +8,6 @@ import world.xuewei.entity.MedicalNews;
 import world.xuewei.utils.Assert;
 import world.xuewei.utils.BeanUtil;
 import world.xuewei.utils.VariableNameUtils;
-import world.xuewei.dao.MedicalNewsMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
@@ -28,9 +27,6 @@ public class MedicalNewsService extends BaseService<MedicalNews> {
 
     @Autowired
     protected MedicalNewsDao medicalNewsDao;
-
-    @Resource
-    private MedicalNewsMapper medicalNewsMapper;
 
     @Override
     public List<MedicalNews> query(MedicalNews o) {
@@ -79,14 +75,14 @@ public class MedicalNewsService extends BaseService<MedicalNews> {
         if (id == null) {
             return null;
         }
-        return medicalNewsMapper.selectById(id);
+        return medicalNewsDao.selectById(id);
     }
 
     /**
      * 获取所有新闻
      */
     public List<MedicalNews> allNews() {
-        return medicalNewsMapper.selectList(null);
+        return medicalNewsDao.selectList(null);
     }
 
     /**
@@ -94,9 +90,9 @@ public class MedicalNewsService extends BaseService<MedicalNews> {
      */
     public void saveNews(MedicalNews news) {
         if (Assert.isEmpty(news.getId())) {
-            medicalNewsMapper.insert(news);
+            medicalNewsDao.insert(news);
         } else {
-            medicalNewsMapper.updateById(news);
+            medicalNewsDao.updateById(news);
         }
     }
 
@@ -105,7 +101,7 @@ public class MedicalNewsService extends BaseService<MedicalNews> {
      */
     public void deleteNews(Long id) {
         if (id != null) {
-            medicalNewsMapper.deleteById(id);
+            medicalNewsDao.deleteById(id);
         }
     }
 
@@ -116,14 +112,14 @@ public class MedicalNewsService extends BaseService<MedicalNews> {
         int offset = (page - 1) * size;
         
         // 获取分页数据
-        List<MedicalNews> newsList = medicalNewsMapper.selectList(
+        List<MedicalNews> newsList = medicalNewsDao.selectList(
             new QueryWrapper<MedicalNews>()
                 .orderByDesc("create_time")
                 .last("limit " + offset + "," + size)
         );
         
         // 获取总记录数
-        Integer total = medicalNewsMapper.selectCount(null);
+        Integer total = medicalNewsDao.selectCount(null);
         
         // 计算总页数
         int pages = (total + size - 1) / size;
@@ -140,14 +136,14 @@ public class MedicalNewsService extends BaseService<MedicalNews> {
      * 根据条件查询列表
      */
     public List<MedicalNews> list(QueryWrapper<MedicalNews> queryWrapper) {
-        return medicalNewsMapper.selectList(queryWrapper);
+        return medicalNewsDao.selectList(queryWrapper);
     }
 
     /**
      * 获取上一篇文章
      */
     public MedicalNews getPrevious(Long id) {
-        return medicalNewsMapper.selectOne(
+        return medicalNewsDao.selectOne(
             new QueryWrapper<MedicalNews>()
                 .lt("id", id)
                 .orderByDesc("id")
@@ -159,7 +155,7 @@ public class MedicalNewsService extends BaseService<MedicalNews> {
      * 获取下一篇文章
      */
     public MedicalNews getNext(Long id) {
-        return medicalNewsMapper.selectOne(
+        return medicalNewsDao.selectOne(
             new QueryWrapper<MedicalNews>()
                 .gt("id", id)
                 .orderByAsc("id")
@@ -174,6 +170,6 @@ public class MedicalNewsService extends BaseService<MedicalNews> {
         Page<MedicalNews> page = new Page<>(pageNum, pageSize);
         QueryWrapper<MedicalNews> wrapper = new QueryWrapper<>();
         wrapper.orderByDesc("create_time");
-        return medicalNewsMapper.selectPage(page, wrapper);
+        return medicalNewsDao.selectPage(page, wrapper);
     }
 }

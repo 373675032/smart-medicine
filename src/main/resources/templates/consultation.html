@@ -248,6 +248,16 @@
     }
 </style>
 
+<!-- 在body末尾添加支付二维码的模态框 -->
+<div id="paymentQRModal" style="display: none;">
+    <div style="text-align: center; padding: 20px;">
+        <img src="assets/images/payment-qr.png" alt="支付二维码" style="width: 200px;">
+        <div id="paymentStatus" style="margin-top: 15px; font-size: 16px;">
+            请扫码支付
+        </div>
+    </div>
+</div>
+
 <script>
     // 页面加载完成后绑定事件
     $(document).ready(function() {
@@ -276,39 +286,69 @@
             btn: ['确定','取消'],
             title: '挂号确认'
         }, function() {
-            // 显示加载中
-            var loadingIndex = layer.load(1, {
-                shade: [0.1, '#fff']
+            // 显示支付二维码
+            var modalIndex = layer.open({
+                type: 1,
+                title: '扫码支付',
+                content: $('#paymentQRModal'),
+                area: ['300px', '400px'],
+                closeBtn: 0,
+                shadeClose: false
             });
             
-            // 模拟支付过程
+            // 3秒后显示支付成功
             setTimeout(function() {
-                layer.close(loadingIndex);
+                $('#paymentStatus').html('<span style="color: #2ecc71;"><i class="fa fa-check-circle"></i> 支付成功</span>');
                 
-                // 记录用户挂号信息
-                $.ajax({
-                    type: "POST",
-                    url: "consultation/register",
-                    data: {
-                        doctorId: doctorId,
-                    },
-                    dataType: "json",
-                    success: function(data) {
-                        if (data.code === 'SUCCESS') {
-                            layer.msg('挂号成功！');
-                            // 延迟刷新页面
-                            setTimeout(function() {
-                                window.location.reload();
-                            }, 1500);
-                        } else {
-                            layer.msg(data.message || '挂号失败，请稍后重试', {icon: 2});
+                // 再等3秒后关闭二维码并处理挂号
+                setTimeout(function() {
+                    layer.close(modalIndex);
+                    
+                    // 记录用户挂号信息
+                    $.ajax({
+                        type: "POST",
+                        url: "consultation/register",
+                        data: {
+                            doctorId: doctorId,
+                        },
+                        dataType: "json",
+                        success: function(data) {
+                            if (data.code === 'SUCCESS') {
+                                layer.msg('挂号成功！');
+                                
+                                // 找到当前医生的挂号按钮并替换为问诊按钮
+                                var $currentBtn = $('.start-register[data-id="' + doctorId + '"]');
+                                var $newBtn = $('<a href="javascript:void(0);" class="btn-consultation start-consultation">' +
+                                              '<i class="fa fa-comments"></i> 问诊</a>');
+                                
+                                // 设置新按钮的属性
+                                $newBtn.attr({
+                                    'data-id': doctorId,
+                                    'data-name': doctorName
+                                });
+                                
+                                // 绑定问诊事件
+                                $newBtn.on('click', function(e) {
+                                    e.preventDefault();
+                                    startConsultation(doctorId, doctorName);
+                                });
+                                
+                                // 替换按钮
+                                $currentBtn.fadeOut(300, function() {
+                                    $(this).replaceWith($newBtn);
+                                    $newBtn.hide().fadeIn(300);
+                                });
+                                
+                            } else {
+                                layer.msg(data.message || '挂号失败，请稍后重试', {icon: 2});
+                            }
+                        },
+                        error: function() {
+                            layer.msg('服务器错误，请稍后重试', {icon: 2});
                         }
-                    },
-                    error: function() {
-                        layer.msg('服务器错误，请稍后重试', {icon: 2});
-                    }
-                });
-            }, 2000);
+                    });
+                }, 3000);
+            }, 3000);
         });
     }
     
@@ -316,7 +356,7 @@
      * 开始问诊
      */
     function startConsultation(doctorId, doctorName) {
-        window.location.href = 'consultation/chat?doctorId=' + doctorId + '&doctorName=' + encodeURIComponent(doctorName);
+        window.location.href = 'consultation-chat?doctorId=' + doctorId + '&doctorName=' + encodeURIComponent(doctorName);
     }
 </script>
 </body>

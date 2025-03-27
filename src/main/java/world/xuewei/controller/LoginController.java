@@ -67,7 +67,7 @@ public class LoginController extends BaseController<User> {
         // 设置角色状态
         user.setRoleStatus(0); // 普通用户
         // 设置默认头像
-        user.setImgPath("https://moti-cloud-v2.oss-cn-beijing.aliyuncs.com/Snipaste_2022-05-01_15-37-01.png");
+        user.setImgPath("/assets/images/default.jpg");
         user = userService.save(user);
         session.setAttribute("loginUser", user);
         
