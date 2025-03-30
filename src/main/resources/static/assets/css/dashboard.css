@@ -4493,7 +4493,7 @@ p.msg {
     background: #ebf0f6;
     padding: 8px;
     display: inline-block;
-    max-width: 40%;
+    max-width: 80%;
     border-radius: 5px;
 }
 .msg-sent p.msg {
