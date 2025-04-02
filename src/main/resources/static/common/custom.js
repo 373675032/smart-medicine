@@ -494,44 +494,136 @@ function messageInit() {
     $("#messages").scrollTop(height);
 }
 
+// 添加一个全局变量来存储当前上传的图片URL
+let currentImageUrls = [];
+
+// 添加图片预览功能
+$('#report-files').on('change', async function(e) {
+    const files = e.target.files;
+    if (files.length === 0) return;
+    
+    // 创建FormData对象
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+        formData.append("files", files[i]);
+    }
+    
+    try {
+        // 上传文件
+        const response = await $.ajax({
+            type: "POST",
+            url: "file/uploadMultiple",
+            data: formData,
+            processData: false,
+            contentType: false
+        });
+        
+        if (response.code === 'SUCCESS') {
+            // 清空预览区域
+            $('#image-preview').empty();
+            // 清空之前的URLs
+            currentImageUrls = [];
+            
+            // 显示预览图并存储URLs
+            response.data.forEach(url => {
+                currentImageUrls.push(url);
+                $('#image-preview').append(`
+                    <div class="position-relative" style="width: 60px; height: 60px;">
+                        <img src="${url}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;">
+                        <button onclick="removeImage('${url}')" class="position-absolute" 
+                                style="top: -5px; right: -5px; border: none; background: red; color: white; 
+                                border-radius: 50%; width: 20px; height: 20px; padding: 0; line-height: 1;">
+                            ×
+                        </button>
+                    </div>
+                `);
+            });
+        } else {
+            layer.msg('上传图片失败：' + response.message);
+        }
+    } catch (error) {
+        layer.msg('上传图片失败');
+        console.error(error);
+    }
+});
+
+// 添加删除图片功能
+function removeImage(url) {
+    currentImageUrls = currentImageUrls.filter(i => i !== url);
+    $('#image-preview').find(`img[src="${url}"]`).parent().remove();
+}
+
 /**
  * 发送消息
  */
 function send() {
     let message = $('#message').val();
-    if (!message) {
+    if (!message && currentImageUrls.length === 0) {
+        layer.msg('请输入消息或上传图片');
         return;
     }
-    $('#messages').append("<div class='msg-received msg-sent' style=\"margin-right: 20px\"><div class='msg-content'><p>现在</p><p class='msg'>" + message + "</p></div></div>");
+
+    // 显示用户发送的消息
+    let userMessageHtml = "<div class='msg-received msg-sent' style=\"margin-right: 20px\">";
+    userMessageHtml += "<div class='msg-content'><p>现在</p>";
+    userMessageHtml += "<p class='msg'>" + message + "</p>";
+    
+    // 显示发送的图片
+    if (currentImageUrls.length > 0) {
+        userMessageHtml += "<div class='d-flex flex-wrap' style='gap: 10px; margin-top: 10px;'>";
+        currentImageUrls.forEach(url => {
+            userMessageHtml += `<img src="${url}" style="max-width: 200px; max-height: 200px; object-fit: cover; border-radius: 4px;">`;
+        });
+        userMessageHtml += "</div>";
+    }
+    
+    userMessageHtml += "</div></div>";
+    $('#messages').append(userMessageHtml);
     messageInit();
     $('#message').val('');
+
+    // 获取当前页面的协议、域名和端口
+    const baseUrl = window.location.protocol + '//' + window.location.host;
+    // 转换图片URL为完整路径
+    const fullImageUrls = currentImageUrls.map(url => url.startsWith('http') ? url : baseUrl + url);
+
     $.ajax({
         type: "POST",
         url: "message/query",
-        data: {
-            content: message,
-        },
+        contentType: "application/json",
+        data: JSON.stringify({
+            content: message || "请帮我分析这些医疗报告图片",
+            image_urls: fullImageUrls  // 使用转换后的完整URL
+        }),
         dataType: "json",
         success: function (data) {
             if (data['code'] === 'SUCCESS') {
-                message = data['message'];
-                $('#messages').append("<div class=\"msg-received\">\n" +
-                    "                   <div class=\"msg-image\">\n" +
-                    "                      <img src=\"assets/images/team/user-2.jpg\" alt=\"image\">\n" +
-                    "                   </div>\n" +
-                    "                   <div class=\"msg-content\">\n" +
-                    "                      <p>现在</p>\n" +
-                    "                      <p class=\"msg\">\n" + message +
-                    "                      </p>\n" +
-                    "                   </div>\n" +
-                    "                  </div>");
+                let responseMessage = data['message'];
+                $('#messages').append(`
+                    <div class="msg-received">
+                        <div class="msg-image">
+                            <img src="${baseUrl}/assets/images/team/user-2.jpg" alt="image">
+                        </div>
+                        <div class="msg-content">
+                            <p>现在</p>
+                            <p class="msg">${responseMessage}</p>
+                        </div>
+                    </div>
+                `);
                 messageInit();
+                
+                // 清空当前图片列表和预览
+                currentImageUrls = [];
+                $('#image-preview').empty();
+            } else {
+                layer.msg('发送失败：' + data['message']);
             }
+        },
+        error: function(xhr, status, error) {
+            layer.msg('请求失败：' + error);
         }
     });
-
 }
-
 
 /**
  * 搜索病
@@ -612,6 +704,7 @@ function previewQualificationImages(input) {
     if (files.length > maxFiles) {
         layer.msg(`最多只能上传${maxFiles}张图片`);
         input.value = '';
+        previewArea.empty();
         return;
     }
     
@@ -712,5 +805,18 @@ function uploadQualificationImages() {
             }
         });
     });
+}
+
+// 假设你需要一个方法来添加图片URL
+function addImageUrl(url) {
+    if (!window.imageUrls) {
+        window.imageUrls = [];
+    }
+    window.imageUrls.push(url);
+}
+
+// 假设你需要一个方法来清除图片URL列表
+function clearImageUrls() {
+    window.imageUrls = [];
 }
 

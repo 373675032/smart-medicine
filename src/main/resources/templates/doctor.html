@@ -68,7 +68,14 @@
 
                                         <div class="msg-reply">
                                             <textarea id="message" placeholder="输入要咨询的内容..."></textarea>
-                                            <button onclick="send()" class="btn btn-na mt-2 pull-right">发送</button>
+                                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                                <input type="file" id="report-files" accept="image/*" multiple style="display: none">
+                                                <button onclick="$('#report-files').click()" class="btn btn-secondary">
+                                                    <i class="fa fa-image"></i> 上传报告
+                                                </button>
+                                                <div id="image-preview" class="d-flex" style="gap: 10px; overflow-x: auto;"></div>
+                                                <button onclick="send()" class="btn btn-na">发送</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -104,5 +111,78 @@
 </html>
 
 <script>
-    window.onload = messageInit;
+    $(document).ready(function() {
+        // 初始化消息
+        messageInit();
+        
+        // 添加文件上传事件监听
+        $('#report-files').on('change', async function(e) {
+            const files = e.target.files;
+            if (files.length === 0) return;
+            
+            // 创建FormData对象
+            const formData = new FormData();
+            for (let i = 0; i < files.length; i++) {
+                formData.append("files", files[i]);
+            }
+            
+            try {
+                // 显示上传中提示
+                const loadingIndex = layer.load(1, {
+                    shade: [0.1,'#fff']
+                });
+                
+                // 上传文件
+                const response = await $.ajax({
+                    type: "POST",
+                    url: "file/uploadMultiple",
+                    data: formData,
+                    processData: false,
+                    contentType: false
+                });
+                
+                // 关闭加载提示
+                layer.close(loadingIndex);
+                
+                if (response.code === 'SUCCESS') {
+                    // 清空预览区域
+                    $('#image-preview').empty();
+                    // 清空之前的URLs
+                    window.currentImageUrls = window.currentImageUrls || [];
+                    window.currentImageUrls = [];
+                    
+                    // 获取当前页面的协议、域名和端口
+                    const baseUrl = window.location.protocol + '//' + window.location.host;
+                    
+                    // 显示预览图并存储URLs
+                    response.data.forEach(url => {
+                        // 构建完整的URL
+                        const fullUrl = baseUrl + url;
+                        window.currentImageUrls.push(fullUrl);
+                        $('#image-preview').append(`
+                            <div class="position-relative" style="width: 60px; height: 60px;">
+                                <img src="${fullUrl}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;">
+                                <button onclick="removeImage('${fullUrl}')" class="position-absolute" 
+                                        style="top: -5px; right: -5px; border: none; background: red; color: white; 
+                                        border-radius: 50%; width: 20px; height: 20px; padding: 0; line-height: 1;">
+                                    ×
+                                </button>
+                            </div>
+                        `);
+                    });
+                } else {
+                    layer.msg('上传图片失败：' + response.message);
+                }
+            } catch (error) {
+                layer.msg('上传图片失败');
+                console.error(error);
+            }
+        });
+    });
+
+    // 添加删除图片功能
+    function removeImage(url) {
+        window.currentImageUrls = window.currentImageUrls.filter(i => i !== url);
+        $('#image-preview').find(`img[src="${url}"]`).parent().remove();
+    }
 </script>
