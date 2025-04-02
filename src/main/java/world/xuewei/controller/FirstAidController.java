@@ -1,23 +1,19 @@
 package world.xuewei.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import world.xuewei.dto.RespResult;
 import world.xuewei.entity.FirstAidCategory;
 import world.xuewei.entity.FirstAidGuide;
-import world.xuewei.entity.User;
 import world.xuewei.service.FirstAidCategoryService;
 import world.xuewei.service.FirstAidService;
 import world.xuewei.utils.Assert;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
-import javax.xml.transform.Result;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

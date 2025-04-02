@@ -1,6 +1,8 @@
 package world.xuewei.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import world.xuewei.dao.MedicalNewsDao;
@@ -8,14 +10,11 @@ import world.xuewei.entity.MedicalNews;
 import world.xuewei.utils.Assert;
 import world.xuewei.utils.BeanUtil;
 import world.xuewei.utils.VariableNameUtils;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Resource;
-import java.util.HashMap;
 
 /**
  * 咨询服务类

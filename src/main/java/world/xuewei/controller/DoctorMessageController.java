@@ -3,7 +3,10 @@ package world.xuewei.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import world.xuewei.dto.RespResult;
 import world.xuewei.entity.ChatMessage;
 import world.xuewei.entity.DoctorRegistration;
@@ -11,7 +14,6 @@ import world.xuewei.entity.User;
 import world.xuewei.service.ChatMessageService;
 import world.xuewei.service.DoctorRegistrationService;
 import world.xuewei.service.UserService;
-
 
 import javax.servlet.http.HttpSession;
 import java.util.*;

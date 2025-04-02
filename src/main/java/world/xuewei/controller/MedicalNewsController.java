@@ -1,21 +1,18 @@
 package world.xuewei.controller;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import world.xuewei.dto.RespResult;
 import world.xuewei.entity.MedicalNews;
 import world.xuewei.service.MedicalNewsService;
 import world.xuewei.utils.Assert;
-import world.xuewei.dto.RespResult;
-import org.apache.commons.io.FileUtils;
+
+import javax.annotation.Resource;
 import java.io.File;
 import java.util.Date;
-import java.util.UUID;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.Collections;
-import javax.annotation.Resource;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import java.util.UUID;
 
 /**
  * 咨询控制器

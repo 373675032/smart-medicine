@@ -1,11 +1,12 @@
 package world.xuewei.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import world.xuewei.entity.FirstAidCategory;
 import world.xuewei.entity.FirstAidGuide;
+
 import java.util.List;
 import java.util.Map;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 
 public interface FirstAidService {
     

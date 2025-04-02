@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
-import world.xuewei.entity.ChatMessage;
 import world.xuewei.dao.ChatMessageDao;
+import world.xuewei.entity.ChatMessage;
 
 import java.util.List;
 

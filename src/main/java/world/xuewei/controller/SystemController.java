@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,9 +14,8 @@ import world.xuewei.entity.*;
 import world.xuewei.service.MedicalNewsService;
 import world.xuewei.utils.Assert;
 
-import java.util.*;
 import javax.annotation.Resource;
-import org.springframework.ui.Model;
+import java.util.*;
 
 /**
  * 系统跳转控制器
