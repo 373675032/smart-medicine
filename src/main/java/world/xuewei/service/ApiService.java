@@ -25,7 +25,7 @@ public class ApiService {
 
     private static StringBuilder finalContent = new StringBuilder();
     
-    private static final String SYSTEM_PROMPT = "你是智能医生，你只回答与医疗相关的问题，不要回答其他问题！";
+    private static final String SYSTEM_PROMPT = "你是小杨同学开发的智能医生，你只回答与医疗相关的问题，不要回答其他问题！";
 
     public String query(String message, List<String> urls) {
         try {
