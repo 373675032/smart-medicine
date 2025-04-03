@@ -286,6 +286,9 @@
             btn: ['确定','取消'],
             title: '挂号确认'
         }, function() {
+            // 重置支付状态文本
+            $('#paymentStatus').html('请扫码支付');
+            
             // 显示支付二维码
             var modalIndex = layer.open({
                 type: 1,
@@ -296,11 +299,19 @@
                 shadeClose: false
             });
             
-            // 3秒后显示支付成功
-            setTimeout(function() {
+            // 设置计时器变量和点击状态
+            var paymentTimer;
+            var hasClicked = false;
+
+            // 绑定二维码点击事件
+            $('#paymentQRModal img').on('click', function() {
+                clearTimeout(paymentTimer); // 清除任何现有的计时器
+                hasClicked = true;
+                
+                // 显示支付成功
                 $('#paymentStatus').html('<span style="color: #2ecc71;"><i class="fa fa-check-circle"></i> 支付成功</span>');
                 
-                // 再等3秒后关闭二维码并处理挂号
+                // 3秒后关闭二维码并处理挂号
                 setTimeout(function() {
                     layer.close(modalIndex);
                     
@@ -340,14 +351,77 @@
                                 });
                                 
                             } else {
-                                layer.msg(data.message || '挂号失败，请稍后重试', {icon: 2});
+                                // 检查是否是已经挂过号的错误
+                                if (data.message && data.message.indexOf('Duplicate') >= 0) {
+                                    layer.msg('您已经挂过此医生的号，可直接问诊', {icon: 1});
+                                    
+                                    // 自动更新按钮状态为问诊
+                                    var $currentBtn = $('.start-register[data-id="' + doctorId + '"]');
+                                    var $newBtn = $('<a href="javascript:void(0);" class="btn-consultation start-consultation">' +
+                                                  '<i class="fa fa-comments"></i> 问诊</a>');
+                                    
+                                    $newBtn.attr({
+                                        'data-id': doctorId,
+                                        'data-name': doctorName
+                                    });
+                                    
+                                    $newBtn.on('click', function(e) {
+                                        e.preventDefault();
+                                        startConsultation(doctorId, doctorName);
+                                    });
+                                    
+                                    $currentBtn.fadeOut(300, function() {
+                                        $(this).replaceWith($newBtn);
+                                        $newBtn.hide().fadeIn(300);
+                                    });
+                                } else {
+                                    layer.msg(data.message || '挂号失败，请稍后重试', {icon: 2});
+                                }
                             }
                         },
-                        error: function() {
-                            layer.msg('服务器错误，请稍后重试', {icon: 2});
+                        error: function(xhr) {
+                            // 检查是否是重复键错误
+                            if (xhr.responseText && xhr.responseText.indexOf('Duplicate') >= 0) {
+                                layer.msg('您已经挂过此医生的号，可直接问诊', {icon: 1});
+                                
+                                // 自动更新按钮状态为问诊
+                                var $currentBtn = $('.start-register[data-id="' + doctorId + '"]');
+                                var $newBtn = $('<a href="javascript:void(0);" class="btn-consultation start-consultation">' +
+                                              '<i class="fa fa-comments"></i> 问诊</a>');
+                                
+                                $newBtn.attr({
+                                    'data-id': doctorId,
+                                    'data-name': doctorName
+                                });
+                                
+                                $newBtn.on('click', function(e) {
+                                    e.preventDefault();
+                                    startConsultation(doctorId, doctorName);
+                                });
+                                
+                                $currentBtn.fadeOut(300, function() {
+                                    $(this).replaceWith($newBtn);
+                                    $newBtn.hide().fadeIn(300);
+                                });
+                            } else {
+                                layer.msg('服务器错误，请稍后重试', {icon: 2});
+                            }
                         }
                     });
                 }, 3000);
+            });
+
+            // 设置3秒后判断是否点击了二维码
+            paymentTimer = setTimeout(function() {
+                if (!hasClicked) {
+                    // 用户未点击二维码，显示支付失败
+                    $('#paymentStatus').html('<span style="color: #e74c3c;"><i class="fa fa-times-circle"></i> 支付失败</span>');
+                    
+                    // 再等2秒后关闭弹窗，但不显示额外的失败提示
+                    setTimeout(function() {
+                        layer.close(modalIndex);
+                    }, 2000);
+                }
             }, 3000);
         });
     }
