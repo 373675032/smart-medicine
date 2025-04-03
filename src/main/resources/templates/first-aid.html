@@ -3,8 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>急救指南</title>
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="assets/css/style.css">
     <link rel="shortcut icon" type="image/x-icon" th:href="@{/assets/images/cropped-favicon-32x32.png}"/>
     <link th:href="@{/assets/css/bootstrap.min.css}" rel="stylesheet" type="text/css"/>
     <link th:href="@{/assets/css/style.css}" rel="stylesheet" type="text/css"/>
@@ -89,8 +87,10 @@
 
     <div th:replace="common/common-bar::#footer"></div>
 
-    <script src="assets/js/jquery-3.5.1.min.js"></script>
-    <script src="assets/js/bootstrap.min.js"></script>
+    <!-- 先加载jQuery -->
+    <script th:src="@{/assets/js/jquery-3.5.1.min.js}"></script>
+
+    <!-- 然后是使用jQuery的自定义脚本 -->
     <script>
         $(document).ready(function() {
             // 分类切换
@@ -121,14 +121,15 @@
             }
         });
     </script>
-        <script th:src="@{/assets/js/jquery-3.5.1.min.js}"></script>
-        <script th:src="@{/assets/js/bootstrap.min.js}"></script>
-        <script th:src="@{/assets/js/plugin.js}"></script>
-        <script th:src="@{/assets/js/main.js}"></script>
-        <script th:src="@{/assets/js/custom-swiper.js}"></script>
-        <script th:src="@{/assets/js/custom-nav.js}"></script>
-        <script th:src="@{/common/utils/reg.js}"></script>
-        <script th:src="@{/common/layer/layer.js}"></script>
-        <script th:src="@{/common/custom.js}"></script>
+
+    <!-- 最后是其他脚本 -->
+    <script th:src="@{/assets/js/bootstrap.min.js}"></script>
+    <script th:src="@{/assets/js/plugin.js}"></script>
+    <script th:src="@{/assets/js/main.js}"></script>
+    <script th:src="@{/assets/js/custom-swiper.js}"></script>
+    <script th:src="@{/assets/js/custom-nav.js}"></script>
+    <script th:src="@{/common/utils/reg.js}"></script>
+    <script th:src="@{/common/layer/layer.js}"></script>
+    <script th:src="@{/common/custom.js}"></script>
 </body>
-</html> 
+</html>
