@@ -153,7 +153,7 @@
         }
         
         .user-table .col-name {
-            width: 140px;
+            width: 120px;
         }
         
         .user-table .col-age {
@@ -173,7 +173,7 @@
         }
         
         .user-table .col-date {
-            width: 140px;
+            width: 70px;
         }
         
         /* 增加操作列宽度，确保3个按钮能完整显示 */
@@ -425,7 +425,6 @@
                     <div class="dashboard-list-box">
                         <div class="dashboard-title">
                             <h4 class="mb-0">用户列表</h4>
-                            <span class="user-count">共 <strong th:text="${userPage.total}">0</strong> 个用户</span>
                         </div>
                         
                         <!-- 使用传统表格布局 -->
@@ -471,7 +470,7 @@
                                             </span>
                                             <span th:if="${user.userType == 0}" class="text-muted">-</span>
                                         </td>
-                                        <td class="col-date" th:text="${#dates.format(user.createTime, 'yyyy-MM-dd HH:mm')}">注册时间</td>
+                                        <td class="col-date" th:text="${#dates.format(user.createTime, 'yyyy-MM-dd')}">注册时间</td>
                                         <td class="col-actions">
                                             <div class="action-buttons">
                                                 <!-- 普通用户或已审核医生 - 角色管理按钮 -->
