@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <!-- 引入 Font Awesome -->
+    <link rel="stylesheet" href="common/font-awesome/css/font-awesome.min.css">
+    <style>
+        /* 导航栏样式优化 */
+
+    </style>
 </head>
 <body>
 
@@ -11,13 +17,13 @@
         <div class="container">
             <div class="top-info d-flex justify-content-between align-items-center">
                 <ul class="t-address">
-                    <li class="pr-2"><i class="far fa-clock"></i>丹心擘划宏图展，医界绽奇葩。【欢迎来到智慧医药系统】本项目原创作者：<a
-                            href="http://xuewei.world">薛伟同学</a></li>
+                    <li class="pr-2"><i class="far fa-clock"></i>欢迎来到智慧医生：<a
+                            href="">小羊</a></li>
                 </ul>
 
                 <ul class="t-social">
                     <li>
-                        <span class="ct-search-link"><a href="#"><i class="fa fa-search"></i> 搜索一下</a></span>
+                        <span class="ct-search-link"><a href="#"><i class="fa fa-search"></i>疾病检索</a></span>
                     </li>
                 </ul>
             </div>
@@ -29,7 +35,7 @@
             <div class="container">
                 <div class="navbar-flex d-flex align-items-center justify-content-between w-100">
 
-                    <div class="navbar-header">
+                    <div class="navbar-header" style="width: 15%;">
                         <a class="navbar-brand text-center" href="index.html">
                             <img src="assets/images/logo.png" alt="image"/>
                         </a>
@@ -37,9 +43,17 @@
 
                     <div class="navbar-collapse1" id="bs-example-navbar-collapse-1">
                         <ul class="nav navbar-nav" id="responsive-menu">
-                            <li><a href="findIllness">疾病百科</a></li>
-                            <li><a href="findMedicines">查找药品</a></li>
-                            <li><a href="doctor">智能医生</a></li>
+                            <li><a href="findIllness"><span>疾病</span><span>百科</span></a></li>
+                            <li><a href="findMedicines"><span>查找</span><span>药品</span></a></li>
+                            <li><a href="health-science"><span>健康</span><span>科普</span></a></li>
+                            <li><a href="first-aid"><span>急救</span><span>指南</span></a></li>
+                            <li><a href="doctor"><span>智能</span><span>医生</span></a></li>
+                            <li>
+                                <a th:href="${session.loginUser != null && session.loginUser.userType == 1 ? '/doctor-consultation' : '/consultation'}">
+                                    <span><i class="fa fa-stethoscope"></i></span>
+                                    <span>在线问诊</span>
+                                </a>
+                            </li>
                         </ul>
                     </div>
                     <div th:if="${session.loginUser == null}" class="header-btn">
@@ -70,6 +84,13 @@
         </nav>
     </div>
 
+    <!-- 固定按钮放在 header 内，但依然保持固定定位 -->
+    <div class="fixed-buttons" style="position: fixed; right: 20px; bottom: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 9999;">
+        <a href="index.html" class="fixed-button" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 50px; height: 50px; background-color: #fff; border: 1px solid #e0e0e0; border-radius: 4px; color: #333; text-decoration: none; transition: all 0.3s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            <i class="fa fa-home" style="font-size: 20px; margin-bottom: 4px;"></i>
+            <span style="font-size: 12px; white-space: nowrap;">首页</span>
+        </a>
+    </div>
 </header>
 
 <section id="back" class="call-to p-5 bg-green">
@@ -132,7 +153,7 @@
                     <div class="ft-lists">
                         <h3 class="cl-white">网站理念</h3>
                         <p class="cl-white">
-                            智慧医药您提供疾病查询,常见疾病大全,帮您全面了解疾病病因症状、检查治疗、饮食护理等信息,是您疾病查询的好帮手。
+                            智慧医生您提供疾病查询,常见疾病大全,帮您全面了解疾病病因症状、检查治疗、饮食护理等信息,是您疾病查询的好帮手。
                         </p>
                     </div>
                 </div>
@@ -142,7 +163,7 @@
     <div class="copyright-main p-3 bg-footer-blue">
         <div class="container">
             <div class="copyright-text d-flex justify-content-between">
-                <p class="cl-white m-0">© 2022 智慧医药系统.</p>
+                <p class="cl-white m-0">© 2025 智慧医生.</p>
             </div>
         </div>
     </div>
@@ -178,7 +199,7 @@
         <div class="author-news mb-3">
             <div class="author-news-content text-center p-3">
                 <div class="author-thumb mt-0">
-                    <img th:src="${session.loginUser.imgPath}" alt="author"/>
+                    <img th:src="${session.loginUser.imgPath != null ? session.loginUser.imgPath : '/assets/images/default.jpg'}" alt="author"/>
                 </div>
                 <div class="author-content pt-2 p-0">
                     <h3 class="mb-1" th:text="${session.loginUser.userName}"></h3>
@@ -200,6 +221,9 @@
                 <li th:class="${cur == 'doctor' ? 'active': ''}">
                     <a href="doctor"><i class="sl sl-icon-envelope-open"></i>智能医生</a>
                 </li>
+                <li th:if="${session.loginUser.roleStatus eq 1}" th:class="${cur == 'users' ? 'active': ''}">
+                    <a href="users"><i class="sl sl-icon-people"></i> 用户管理</a>
+                </li>
                 <li th:if="${session.loginUser.roleStatus eq 1}" th:class="${cur == 'illness' ? 'active': ''}">
                     <a href="all-illness"><i class="sl sl-icon-layers"></i> 疾病管理</a>
                 </li>
@@ -209,6 +233,17 @@
                 <li th:if="${session.loginUser.roleStatus eq 1}" th:class="${cur == 'feedback' ? 'active': ''}">
                     <a href="all-feedback"><i class="sl sl-icon-layers"></i> 反馈管理</a>
                 </li>
+                <li th:if="${session.loginUser.roleStatus eq 1}" th:class="${cur == 'health-science' ? 'active': ''}">
+                    <a href="all-health-science"><i class="sl sl-icon-book-open"></i> 健康科普管理</a>
+                </li>
+                <li th:if="${session.loginUser.roleStatus eq 1}" th:class="${cur == 'first-aid' ? 'active': ''}">
+                    <a href="all-first-aid"><i class="sl sl-icon-layers"></i> 急救指南管理</a>
+                </li>
+                <li th:class="${cur == 'consultation' ? 'active': ''}">
+                    <a th:href="${session.loginUser != null && session.loginUser.userType == 1 ? '/doctor-consultation' : '/consultation'}">
+                        <i class="sl sl-icon-user-following"></i> 在线问诊
+                    </a>
+                </li>
                 <li>
                     <a href="logout"><i class="sl sl-icon-power"></i> 退出登录</a>
                 </li>
@@ -216,5 +251,13 @@
         </div>
     </div>
 </div>
+
+<!-- 调试信息 -->
+<div style="display:none">
+  用户类型: [[${session.loginUser != null ? session.loginUser.userType : 'null'}]]
+  是否医生: [[${session.loginUser != null && session.loginUser.userType == 1}]]
+  链接应该是: [[${session.loginUser != null && session.loginUser.userType == 1 ? '/doctor-consultation' : '/consultation'}]]
+</div>
+
 </body>
 </html>

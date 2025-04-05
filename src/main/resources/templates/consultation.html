@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zxx" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>在线问诊 - 智慧医生</title>
+
+    <link rel="shortcut icon" type="image/x-icon" href="assets/images/cropped-favicon-32x32.png"/>
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/plugin.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/dashboard.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/fonts/flaticon.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/icons.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="assets/fonts/line-icons.css" type="text/css"/>
+    <link rel="stylesheet" href="common/font-awesome/css/font-awesome.min.css">
+</head>
+<body>
+
+<div id="preloader">
+    <div id="status"></div>
+</div>
+
+<div th:replace="common/common-bar::#header"></div>
+
+<div class="dashboard-banner">
+    <div class="container">
+        <div class="dashboard-head text-center">
+            <h3>在线问诊</h3>
+            <p>咨询专业医生，关爱健康生活</p>
+        </div>
+    </div>
+</div>
+
+<div id="dashboard">
+    <div class="container">
+        <div class="dashboard-main">
+            <div class="row">
+                <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12">
+                    <div th:replace="common/common-bar::#dashboard-sidebar(cur='consultation')"></div>
+                </div>
+                <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
+                    <div class="dashboard-content">
+                        <!-- 医生列表 -->
+                        <div class="row">
+                            <!-- 遍历医生列表 -->
+                            <div class="col-lg-4 col-md-6 col-sm-12" th:each="doctor : ${doctors}">
+                                <div class="doctor-item">
+                                    <div class="doctor-img">
+                                        <!-- 使用固定默认头像 -->
+                                        <img src="assets/images/team/user-2.jpg" alt="医生头像">
+                                    </div>
+                                    <div class="doctor-content">
+                                        <h4 th:text="${doctor.userName}">医生姓名</h4>
+                                        <p class="doctor-speciality">全科医生</p>
+                                        <p class="doctor-status">
+<!--                                            <span class="online-indicator"></span>-->
+<!--                                            <span>在线</span>-->
+                                        </p>
+                                    </div>
+                                    <div class="doctor-actions">
+                                        <!-- 修复问题：使用硬编码的ID和额外的class来区分 -->
+                                        <a href="javascript:void(0);" th:if="${doctor.isRegistered}" 
+                                           th:attr="data-id=${doctor.id},data-name=${doctor.userName}"
+                                           class="btn-consultation start-consultation">
+                                            <i class="fa fa-comments"></i> 问诊
+                                        </a>
+                                        <a href="javascript:void(0);" th:unless="${doctor.isRegistered}" 
+                                           th:attr="data-id=${doctor.id},data-name=${doctor.userName}"
+                                           class="btn-register start-register">
+                                            <i class="fa fa-plus-circle"></i> 挂号
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 如果没有医生数据 -->
+                            <div class="col-12" th:if="${doctors.size() == 0}">
+                                <div class="no-doctors-message">
+                                    <i class="fa fa-user-md"></i>
+                                    <p>暂无审核通过的医生</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 分页 -->
+                        <div class="pagination-wrapper" th:if="${doctorPage.pages > 1}">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination">
+                                    <li th:if="${doctorPage.current > 1}">
+                                        <a th:href="@{/consultation(page=1,size=${doctorPage.size})}" aria-label="First">
+                                            <span aria-hidden="true"><i class="fa fa-angle-double-left"></i></span>
+                                        </a>
+                                    </li>
+                                    <li th:if="${doctorPage.current > 1}">
+                                        <a th:href="@{/consultation(page=${doctorPage.current-1},size=${doctorPage.size})}" aria-label="Previous">
+                                            <span aria-hidden="true"><i class="fa fa-angle-left"></i></span>
+                                        </a>
+                                    </li>
+                                    <li th:each="i : ${#numbers.sequence(1, doctorPage.pages)}"
+                                        th:class="${i == doctorPage.current ? 'active' : ''}">
+                                        <a th:href="@{/consultation(page=${i},size=${doctorPage.size})}" th:text="${i}"></a>
+                                    </li>
+                                    <li th:if="${doctorPage.current < doctorPage.pages}">
+                                        <a th:href="@{/consultation(page=${doctorPage.current+1},size=${doctorPage.size})}" aria-label="Next">
+                                            <span aria-hidden="true"><i class="fa fa-angle-right"></i></span>
+                                        </a>
+                                    </li>
+                                    <li th:if="${doctorPage.current < doctorPage.pages}">
+                                        <a th:href="@{/consultation(page=${doctorPage.pages},size=${doctorPage.size})}" aria-label="Last">
+                                            <span aria-hidden="true"><i class="fa fa-angle-double-right"></i></span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="common/common-bar::#back"></div>
+<div th:replace="common/common-bar::#footer"></div>
+<div th:replace="common/common-bar::#search"></div>
+<div th:replace="common/common-bar::#back-to-top"></div>
+
+<script src="assets/js/jquery-3.5.1.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
+<script src="assets/js/plugin.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/custom-nav.js"></script>
+<script src="assets/js/jpanelmenu.min.js"></script>
+<script src="assets/js/dashboard-custom.js"></script>
+<script src="common/utils/reg.js"></script>
+<script src="common/layer/layer.js"></script>
+<script src="common/custom.js"></script>
+
+<!-- 添加样式 -->
+<style>
+    /* 医生卡片样式 */
+    .doctor-item {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+        margin-bottom: 30px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .doctor-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .doctor-img {
+        position: relative;
+        height: 180px;
+        overflow: hidden;
+    }
+    
+    .doctor-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .doctor-content {
+        padding: 20px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .doctor-content h4 {
+        margin: 0 0 10px;
+        font-size: 18px;
+        font-weight: 600;
+    }
+    
+    .doctor-speciality {
+        color: #ff7f00;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+    
+    .doctor-status {
+        display: flex;
+        align-items: center;
+        margin: 0;
+    }
+    
+    .online-indicator {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background-color: #2ecc71;
+        border-radius: 50%;
+        margin-right: 5px;
+    }
+    
+    .doctor-actions {
+        padding: 15px 20px;
+        text-align: right;
+    }
+    
+    /* 按钮样式 */
+    .btn-consultation, .btn-register {
+        display: inline-block;
+        padding: 8px 15px;
+        border-radius: 50px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        color: #fff;
+        text-decoration: none;
+    }
+    
+    .btn-consultation {
+        background-color: #3498db;
+    }
+    
+    .btn-register {
+        background-color: #2ecc71;
+    }
+    
+    .btn-consultation:hover, .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        color: #fff;
+    }
+    
+    /* 无医生数据样式 */
+    .no-doctors-message {
+        text-align: center;
+        padding: 50px 0;
+    }
+    
+    .no-doctors-message i {
+        font-size: 60px;
+        color: #ddd;
+        margin-bottom: 20px;
+        display: block;
+    }
+    
+    .no-doctors-message p {
+        color: #999;
+        font-size: 16px;
+    }
+</style>
+
+<!-- 在body末尾添加支付二维码的模态框 -->
+<div id="paymentQRModal" style="display: none;">
+    <div style="text-align: center; padding: 20px;">
+        <img src="assets/images/payment-qr.jpg" alt="支付二维码" style="width: 200px;">
+        <div id="paymentStatus" style="margin-top: 15px; font-size: 16px;">
+            请扫码支付
+        </div>
+    </div>
+</div>
+
+<script>
+    // 页面加载完成后绑定事件
+    $(document).ready(function() {
+        // 为问诊按钮绑定点击事件
+        $('.start-consultation').on('click', function(e) {
+            e.preventDefault();
+            var doctorId = $(this).attr('data-id');  // 修改了获取方式
+            var doctorName = $(this).attr('data-name');  // 修改了获取方式
+            startConsultation(doctorId, doctorName);
+        });
+        
+        // 为挂号按钮绑定点击事件
+        $('.start-register').on('click', function(e) {
+            e.preventDefault();
+            var doctorId = $(this).attr('data-id');  // 修改了获取方式
+            var doctorName = $(this).attr('data-name');  // 修改了获取方式
+            registerDoctor(doctorId, doctorName);
+        });
+    });
+
+    /**
+     * 挂号医生
+     */
+    function registerDoctor(doctorId, doctorName) {
+        layer.confirm('确定要挂号' + doctorName + '医生吗？<br/>挂号费用：30元', {
+            btn: ['确定','取消'],
+            title: '挂号确认'
+        }, function() {
+            // 重置支付状态文本
+            $('#paymentStatus').html('请扫码支付');
+            
+            // 显示支付二维码
+            var modalIndex = layer.open({
+                type: 1,
+                title: '扫码支付',
+                content: $('#paymentQRModal'),
+                area: ['300px', '400px'],
+                closeBtn: 0,
+                shadeClose: false
+            });
+            
+            // 设置计时器变量和点击状态
+            var paymentTimer;
+            var hasClicked = false;
+
+            // 绑定二维码点击事件
+            $('#paymentQRModal img').on('click', function() {
+                clearTimeout(paymentTimer); // 清除任何现有的计时器
+                hasClicked = true;
+                
+                // 显示支付成功
+                $('#paymentStatus').html('<span style="color: #2ecc71;"><i class="fa fa-check-circle"></i> 支付成功</span>');
+                
+                // 3秒后关闭二维码并处理挂号
+                setTimeout(function() {
+                    layer.close(modalIndex);
+                    
+                    // 记录用户挂号信息
+                    $.ajax({
+                        type: "POST",
+                        url: "consultation/register",
+                        data: {
+                            doctorId: doctorId,
+                        },
+                        dataType: "json",
+                        success: function(data) {
+                            if (data.code === 'SUCCESS') {
+                                layer.msg('挂号成功！');
+                                
+                                // 找到当前医生的挂号按钮并替换为问诊按钮
+                                var $currentBtn = $('.start-register[data-id="' + doctorId + '"]');
+                                var $newBtn = $('<a href="javascript:void(0);" class="btn-consultation start-consultation">' +
+                                              '<i class="fa fa-comments"></i> 问诊</a>');
+                                
+                                // 设置新按钮的属性
+                                $newBtn.attr({
+                                    'data-id': doctorId,
+                                    'data-name': doctorName
+                                });
+                                
+                                // 绑定问诊事件
+                                $newBtn.on('click', function(e) {
+                                    e.preventDefault();
+                                    startConsultation(doctorId, doctorName);
+                                });
+                                
+                                // 替换按钮
+                                $currentBtn.fadeOut(300, function() {
+                                    $(this).replaceWith($newBtn);
+                                    $newBtn.hide().fadeIn(300);
+                                });
+                                
+                            } else {
+                                // 检查是否是已经挂过号的错误
+                                if (data.message && data.message.indexOf('Duplicate') >= 0) {
+                                    layer.msg('您已经挂过此医生的号，可直接问诊', {icon: 1});
+                                    
+                                    // 自动更新按钮状态为问诊
+                                    var $currentBtn = $('.start-register[data-id="' + doctorId + '"]');
+                                    var $newBtn = $('<a href="javascript:void(0);" class="btn-consultation start-consultation">' +
+                                                  '<i class="fa fa-comments"></i> 问诊</a>');
+                                    
+                                    $newBtn.attr({
+                                        'data-id': doctorId,
+                                        'data-name': doctorName
+                                    });
+                                    
+                                    $newBtn.on('click', function(e) {
+                                        e.preventDefault();
+                                        startConsultation(doctorId, doctorName);
+                                    });
+                                    
+                                    $currentBtn.fadeOut(300, function() {
+                                        $(this).replaceWith($newBtn);
+                                        $newBtn.hide().fadeIn(300);
+                                    });
+                                } else {
+                                    layer.msg(data.message || '挂号失败，请稍后重试', {icon: 2});
+                                }
+                            }
+                        },
+                        error: function(xhr) {
+                            // 检查是否是重复键错误
+                            if (xhr.responseText && xhr.responseText.indexOf('Duplicate') >= 0) {
+                                layer.msg('您已经挂过此医生的号，可直接问诊', {icon: 1});
+                                
+                                // 自动更新按钮状态为问诊
+                                var $currentBtn = $('.start-register[data-id="' + doctorId + '"]');
+                                var $newBtn = $('<a href="javascript:void(0);" class="btn-consultation start-consultation">' +
+                                              '<i class="fa fa-comments"></i> 问诊</a>');
+                                
+                                $newBtn.attr({
+                                    'data-id': doctorId,
+                                    'data-name': doctorName
+                                });
+                                
+                                $newBtn.on('click', function(e) {
+                                    e.preventDefault();
+                                    startConsultation(doctorId, doctorName);
+                                });
+                                
+                                $currentBtn.fadeOut(300, function() {
+                                    $(this).replaceWith($newBtn);
+                                    $newBtn.hide().fadeIn(300);
+                                });
+                            } else {
+                                layer.msg('服务器错误，请稍后重试', {icon: 2});
+                            }
+                        }
+                    });
+                }, 3000);
+            });
+
+            // 设置3秒后判断是否点击了二维码
+            paymentTimer = setTimeout(function() {
+                if (!hasClicked) {
+                    // 用户未点击二维码，显示支付失败
+                    $('#paymentStatus').html('<span style="color: #e74c3c;"><i class="fa fa-times-circle"></i> 支付失败</span>');
+                    
+                    // 再等2秒后关闭弹窗，但不显示额外的失败提示
+                    setTimeout(function() {
+                        layer.close(modalIndex);
+                    }, 2000);
+                }
+            }, 3000);
+        });
+    }
+    
+    /**
+     * 开始问诊
+     */
+    function startConsultation(doctorId, doctorName) {
+        window.location.href = 'consultation-chat?doctorId=' + doctorId + '&doctorName=' + encodeURIComponent(doctorName);
+    }
+</script>
+</body>
+</html> 

@@ -1,55 +1,86 @@
 package world.xuewei.service;
 
-import com.alibaba.dashscope.aigc.generation.Generation;
-import com.alibaba.dashscope.aigc.generation.GenerationOutput;
-import com.alibaba.dashscope.aigc.generation.GenerationResult;
-import com.alibaba.dashscope.aigc.generation.models.QwenParam;
-import com.alibaba.dashscope.common.Message;
-import com.alibaba.dashscope.common.MessageManager;
+import com.alibaba.dashscope.aigc.multimodalconversation.MultiModalConversation;
+import com.alibaba.dashscope.aigc.multimodalconversation.MultiModalConversationParam;
+import com.alibaba.dashscope.aigc.multimodalconversation.MultiModalConversationResult;
+import com.alibaba.dashscope.common.MultiModalMessage;
 import com.alibaba.dashscope.common.Role;
-import com.alibaba.dashscope.utils.Constants;
+import io.reactivex.Flowable;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.*;
+
 /**
- * 智慧医生服务
- * <p>
- * ==========================================================================
- * 郑重说明：本项目免费开源！原创作者为：薛伟同学，严禁私自出售。
- * ==========================================================================
- * B站账号：薛伟同学
- * 微信公众号：薛伟同学
- * 作者博客：http://xuewei.world
- * ==========================================================================
- * 陆陆续续总会收到粉丝的提醒，总会有些人为了赚取利益倒卖我的开源项目。
- * 不乏有粉丝朋友出现钱付过去，那边只把代码发给他就跑路的，最后还是根据线索找到我。。
- * 希望各位朋友擦亮慧眼，谨防上当受骗！
- * ==========================================================================
  *
  * @author <a href="http://xuewei.world/about">XUEW</a>
  */
 @Service
+@Slf4j
 public class ApiService {
 
     @Value("${ai-key}")
     private String apiKey;
 
-    public String query(String queryMessage) {
-        Constants.apiKey = apiKey;
+    private static StringBuilder finalContent = new StringBuilder();
+    
+    private static final String SYSTEM_PROMPT = "你是小杨同学开发的智能医生，你只回答与医疗相关的问题，不要回答其他问题！";
+
+    public String query(String message, List<String> urls) {
         try {
-            Generation gen = new Generation();
-            MessageManager msgManager = new MessageManager(10);
-            Message systemMsg = Message.builder().role(Role.SYSTEM.getValue()).content("你是薛伟同学开发的智能医生，你只回答与医疗相关的问题，不要回答其他问题！").build();
-            Message userMsg = Message.builder().role(Role.USER.getValue()).content(queryMessage).build();
-            msgManager.add(systemMsg);
-            msgManager.add(userMsg);
-            QwenParam param = QwenParam.builder().model(Generation.Models.QWEN_TURBO).messages(msgManager.get()).resultFormat(QwenParam.ResultFormat.MESSAGE).build();
-            GenerationResult result = gen.call(param);
-            GenerationOutput output = result.getOutput();
-            Message message = output.getChoices().get(0).getMessage();
-            return message.getContent();
+            log.info("消息内容:{}", message);
+            MultiModalConversation conv = new MultiModalConversation();
+            List<MultiModalMessage> messages = new ArrayList<>();
+            
+            // 构建消息内容
+            List<Map<String, Object>> content = new ArrayList<>();
+            
+            // 添加图片（如果有）
+            if (urls != null && !urls.isEmpty()) {
+                for (String url : urls) {
+                    content.add(Collections.singletonMap("image", url));
+                }
+            }
+            
+            // 将系统提示和用户消息合并
+            String combinedMessage = SYSTEM_PROMPT + "\n\n用户问题：" + message;
+            content.add(Collections.singletonMap("text", combinedMessage));
+            
+            // 构建用户消息
+            MultiModalMessage userMsg = MultiModalMessage.builder()
+                    .role(Role.USER.getValue())
+                    .content(content)
+                    .build();
+            messages.add(userMsg);
+            
+            // 重置StringBuilder
+            finalContent.setLength(0);
+            
+            // 调用API
+            MultiModalConversationParam param = MultiModalConversationParam.builder()
+                    .apiKey(apiKey)
+                    .model("qwen-vl-plus")
+                    .messages(messages)
+                    .incrementalOutput(true)
+                    .build();
+                    
+            Flowable<MultiModalConversationResult> result = conv.streamCall(param);
+            result.blockingForEach(this::handleGenerationResult);
+            
+            return finalContent.toString();
+            
         } catch (Exception e) {
-            return "智能医生现在不在线，请稍后再试～";
+            log.error("Query failed: {}", e.getMessage());
+            return "Error: " + e.getMessage();
+        }
+    }
+    
+    private void handleGenerationResult(MultiModalConversationResult message) {
+        List<Map<String, Object>> content = message.getOutput().getChoices().get(0).getMessage().getContent();
+        if (Objects.nonNull(content) && !content.isEmpty()) {
+            Object text = content.get(0).get("text");
+            finalContent.append(text);
         }
     }
 }

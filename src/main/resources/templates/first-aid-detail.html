@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zxx" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>急救指南详情</title>
+
+    <link rel="shortcut icon" type="image/x-icon" th:href="@{/assets/images/cropped-favicon-32x32.png}"/>
+    <link th:href="@{/assets/css/bootstrap.min.css}" rel="stylesheet" type="text/css"/>
+    <link th:href="@{/assets/css/style.css}" rel="stylesheet" type="text/css"/>
+    <link th:href="@{/assets/css/plugin.css}" rel="stylesheet" type="text/css"/>
+    <link th:href="@{/assets/css/dashboard.css}" rel="stylesheet" type="text/css"/>
+    <link th:href="@{/assets/fonts/flaticon.css}" rel="stylesheet" type="text/css"/>
+    <link th:href="@{/assets/css/icons.css}" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" th:href="@{/assets/fonts/line-icons.css}" type="text/css"/>
+    <link rel="stylesheet" th:href="@{/common/font-awesome/css/font-awesome.min.css}">
+    <style>
+        /* 保持基础布局样式 */
+        .main-content {
+            padding-top: 300px; /* 给顶部导航留出空间 */
+            padding-bottom: 50px;
+            min-height: calc(100vh - 400px); /* 确保内容区域足够高 */
+        }
+
+        /* 详情页样式 */
+        .guide-detail {
+            background: #fff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .guide-title {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .guide-meta {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .guide-content {
+            color: #333;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+
+        .guide-content img {
+            max-width: 100%;
+            height: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="preloader">
+        <div id="status"></div>
+    </div>
+
+    <div th:replace="common/common-bar::#header"></div>
+
+    <div class="main-content">
+        <div class="container">
+            <div class="guide-detail">
+                <h1 class="guide-title" th:text="${guide.title}"></h1>
+                <div class="guide-meta">
+                    <span th:text="${guide.categoryName}"></span>
+                    <span class="mx-2">·</span>
+                    <span th:text="${#dates.format(guide.createTime, 'yyyy-MM-dd')}"></span>
+                </div>
+                <div class="guide-content" th:utext="${guide.content}"></div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="common/common-bar::#footer"></div>
+    <div th:replace="common/common-bar::#search"></div>
+    <div th:replace="common/common-bar::#back-to-top"></div>
+
+    <script th:src="@{/assets/js/jquery-3.5.1.min.js}"></script>
+    <script th:src="@{/assets/js/bootstrap.min.js}"></script>
+    <script th:src="@{/assets/js/plugin.js}"></script>
+    <script th:src="@{/assets/js/main.js}"></script>
+    <script th:src="@{/assets/js/custom-swiper.js}"></script>
+    <script th:src="@{/assets/js/custom-nav.js}"></script>
+    <script th:src="@{/common/utils/reg.js}"></script>
+    <script th:src="@{/common/layer/layer.js}"></script>
+    <script th:src="@{/common/custom.js}"></script>
+</body>
+</html> 
