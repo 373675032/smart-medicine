@@ -2,8 +2,8 @@ spring:
   # 数据源配置
   datasource:
     username: root
-    password: 123123
-    url: jdbc:mysql://192.168.1.11:3306/smart_medicine?serverTimezone=Hongkong&useAffectedRows=true&characterEncoding=utf-8
+    password: xxxxxx
+    url: jdbc:mysql://localhost:3306/smart_medicine?serverTimezone=Hongkong&useAffectedRows=true&characterEncoding=utf-8
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
   jackson:
@@ -11,8 +11,8 @@ spring:
     time-zone: GMT+8
   # 邮件配置
   mail:
-    username: 1106591118@qq.com
-    password: lpezbbybdrzwhibe
+    username: xxxxx@qq.com
+    password: xxxxxx
     host: smtp.qq.com
     port: 465
     properties:
@@ -42,7 +42,7 @@ mybatis-plus:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 # 阿里云通义千问配置
-ai-key: sk-f58172191a584b08b64c245c5b992192
+ai-key: sk-fxxxxx
 # 阿里云对象存储配置
 oss:
   bucket-name: xxxxxxxxxxx
