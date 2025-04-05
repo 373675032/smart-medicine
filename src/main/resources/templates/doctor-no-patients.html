@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zxx" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>暂无患者 - 智慧医药系统</title>
+
+    <link rel="shortcut icon" type="image/x-icon" href="/assets/images/cropped-favicon-32x32.png"/>
+    <link href="/assets/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/assets/css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="/assets/css/plugin.css" rel="stylesheet" type="text/css"/>
+    <link href="/assets/css/dashboard.css" rel="stylesheet" type="text/css"/>
+    <link href="/assets/fonts/flaticon.css" rel="stylesheet" type="text/css"/>
+    <link href="/assets/css/icons.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="/assets/fonts/line-icons.css" type="text/css"/>
+    <link rel="stylesheet" href="/common/font-awesome/css/font-awesome.min.css">
+</head>
+<body>
+
+<div id="preloader">
+    <div id="status"></div>
+</div>
+
+<div th:replace="common/common-bar::#header"></div>
+
+<div class="dashboard-banner">
+    <div class="container">
+        <div class="dashboard-head text-center">
+            <h3>医生在线问诊</h3>
+            <p>在线接诊患者</p>
+        </div>
+    </div>
+</div>
+
+<div id="dashboard">
+    <div class="container">
+        <div class="dashboard-main">
+            <div class="row">
+                <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12">
+                    <div th:replace="common/common-bar::#dashboard-sidebar(cur='consultation')"></div>
+                </div>
+                <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
+                    <div class="dashboard-content">
+                        <div class="no-patients-message text-center" style="padding: 50px 20px;">
+                            <i class="fa fa-user-o mb-4" style="font-size: 48px; color: #ddd;"></i>
+                            <h4 style="margin-bottom: 20px; color: #555;">暂无患者挂号</h4>
+                            <p style="color: #999; margin-bottom: 30px;">目前没有患者挂号给您，请稍后再查看。</p>
+                            <a href="/index.html" class="btn-blue">返回首页</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="common/common-bar::#footer"></div>
+
+<script src="/assets/js/jquery-3.5.1.min.js"></script>
+<script src="/assets/js/bootstrap.min.js"></script>
+<script src="/assets/js/plugin.js"></script>
+<script src="/assets/js/main.js"></script>
+<script src="/assets/js/custom-nav.js"></script>
+
+</body>
+</html> 
