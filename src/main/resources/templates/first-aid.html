@@ -1,23 +1,24 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>急救指南</title>
-    <link rel="shortcut icon" type="image/x-icon" th:href="@{/assets/images/cropped-favicon-32x32.png}"/>
-    <link th:href="@{/assets/css/bootstrap.min.css}" rel="stylesheet" type="text/css"/>
-    <link th:href="@{/assets/css/style.css}" rel="stylesheet" type="text/css"/>
-    <link th:href="@{/assets/css/plugin.css}" rel="stylesheet" type="text/css"/>
-    <link th:href="@{/assets/css/dashboard.css}" rel="stylesheet" type="text/css"/>
-    <link th:href="@{/assets/fonts/flaticon.css}" rel="stylesheet" type="text/css"/>
-    <link th:href="@{/assets/css/icons.css}" rel="stylesheet" type="text/css"/>
-    <link rel="stylesheet" th:href="@{/assets/fonts/line-icons.css}" type="text/css"/>
-    <link rel="stylesheet" th:href="@{/common/font-awesome/css/font-awesome.min.css}">
+    <link rel="shortcut icon" type="image/x-icon" href="assets/images/cropped-favicon-32x32.png"/>
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/plugin.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/dashboard.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/fonts/flaticon.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/icons.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="assets/fonts/line-icons.css" type="text/css"/>
+    <link rel="stylesheet" href="common/font-awesome/css/font-awesome.min.css">
     <style>
         /* 主要内容区域样式 */
         .main-content {
-            padding-top: 300px; /* 给顶部导航留出空间 */
+            padding-top: 6%; /* 减小顶部内边距，因为现在有banner了 */
             padding-bottom: 50px;
-            min-height: calc(100vh - 260px); /* 确保内容区域足够高 */
+            min-height: calc(100vh - 260px);
         }
         .category-header {
             margin-bottom: 15px;
@@ -31,67 +32,131 @@
             padding: 10px 0;
         }
 
-        .guide-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 30px;
-        }
-
         .guide-item {
-            background: #fff;
-            padding: 6px 12px;
-            border-radius: 4px;
+            display: inline-block;
             color: #666;
             text-decoration: none;
             font-size: 14px;
-            border: 1px solid #e0e0e0;
-            transition: all 0.2s ease;
+            margin: 5px 15px;
+            position: relative;
+            padding-left: 12px;
+            width: calc(20% - 30px); /* 每行5个，减去左右margin */
+        }
+
+        .guide-item:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #666;
         }
 
         .guide-item:hover {
-            color: #fff;
-            background: #4263EB;
-            border-color: #4263EB;
+            color: #4263EB;
+            text-decoration: none;
+        }
+
+        .guide-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
         }
 
         .category-section {
-            background: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .category-section h3 {
+            display: inline-block;
+            background-color: #00C689;
+            color: white;
+            font-size: 14px;
+            padding: 6px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-weight: normal;
+        }
+
+        .banner-section {
+            width: 100%;
+            height: 120px; /* 调整高度更合适 */
+            background-color: #2196F3;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .banner-image {
+            height: 165px; /* 调整高度更合适 */
+            object-position: center;
+            margin-bottom: 30px;
+            max-width: 100%;
         }
     </style>
 </head>
 <body>
-    <div th:replace="common/common-bar::#header"></div>
+<div th:replace="common/common-bar::#header"></div>
 
-    <div class="main-content">
-        <div class="container">
-            <div class="guide-container">
-                <div th:each="category : ${categories}" class="category-section">
-                    <h3 th:text="${category.name}"></h3>
-                    <div class="guide-list">
-                        <div th:each="guide : ${allGuides.get(category.id)}" class="guide-item">
-                            <a th:href="@{/first-aid-detail(id=${guide.id})}">
-                                <h4 style="text-align: center;margin-top: 20px;" th:text="${guide.title}"></h4>
-                                
-                            </a>
-                        </div>
-                    </div>
+
+
+<div class="main-content">
+
+
+    <div class="container">
+        <div class="guide-container">
+            <!-- 疾病突发 -->
+
+            <img th:src="@{/upload/1740448440102.jpg}" alt="急救指南" class="banner-image">
+            <div th:each="category : ${categories}" class="category-section"
+                 th:if="${category.name == '危重急救' || category.name == '急症突发'}">
+                <h3 th:text="${category.name}"></h3>
+                <div class="guide-list">
+                    <a th:each="guide : ${allGuides.get(category.id)}"
+                       th:href="@{/first-aid-detail(id=${guide.id})}"
+                       class="guide-item"
+                       th:text="${guide.title}">
+                    </a>
+                </div>
+            </div>
+
+
+            <img th:src="@{/upload/1740448571615.jpg}" alt="急救指南" class="banner-image">
+            <!-- 户外急救 -->
+            <div th:each="category : ${categories}" class="category-section"
+                 th:if="${category.name == '运动损伤' || category.name == '意外事故' || category.name == '阿里巴巴'}">
+                <h3 th:text="${category.name}"></h3>
+                <div class="guide-list">
+                    <a th:each="guide : ${allGuides.get(category.id)}"
+                       th:href="@{/first-aid-detail(id=${guide.id})}"
+                       class="guide-item"
+                       th:text="${guide.title}">
+                    </a>
+                </div>
+            </div>
+
+
+
+
+            <!-- 家庭急救 -->
+            <img th:src="@{/upload/1740448627162.jpg}" alt="急救指南" class="banner-image">
+            <div th:each="category : ${categories}" class="category-section"
+                 th:if="${category.name == '家庭护理' || category.name == '中毒处理'}">
+                <h3 th:text="${category.name}"></h3>
+                <div class="guide-list">
+                    <a th:each="guide : ${allGuides.get(category.id)}"
+                       th:href="@{/first-aid-detail(id=${guide.id})}"
+                       class="guide-item"
+                       th:text="${guide.title}">
+                    </a>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <div th:replace="common/common-bar::#footer"></div>
+<div th:replace="common/common-bar::#footer"></div>
+<div th:replace="common/common-bar::#search"></div>
+<div th:replace="common/common-bar::#back-to-top"></div>
 
-    <!-- 先加载jQuery -->
-    <script th:src="@{/assets/js/jquery-3.5.1.min.js}"></script>
-
-    <!-- 然后是使用jQuery的自定义脚本 -->
-    <script>
+<script>
         $(document).ready(function() {
             // 分类切换
             $('.category-list a').click(function(e) {
@@ -121,15 +186,14 @@
             }
         });
     </script>
-
-    <!-- 最后是其他脚本 -->
-    <script th:src="@{/assets/js/bootstrap.min.js}"></script>
-    <script th:src="@{/assets/js/plugin.js}"></script>
-    <script th:src="@{/assets/js/main.js}"></script>
-    <script th:src="@{/assets/js/custom-swiper.js}"></script>
-    <script th:src="@{/assets/js/custom-nav.js}"></script>
-    <script th:src="@{/common/utils/reg.js}"></script>
-    <script th:src="@{/common/layer/layer.js}"></script>
-    <script th:src="@{/common/custom.js}"></script>
+<script src="assets/js/jquery-3.5.1.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
+<script src="assets/js/plugin.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/custom-swiper.js"></script>
+<script src="assets/js/custom-nav.js"></script>
+<script src="common/utils/reg.js"></script>
+<script src="common/layer/layer.js"></script>
+<script src="common/custom.js"></script>
 </body>
-</html>
+</html> 
