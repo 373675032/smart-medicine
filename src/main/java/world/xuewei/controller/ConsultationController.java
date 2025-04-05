@@ -65,18 +65,29 @@ public class ConsultationController {
         
         IPage<User> pageData = userService.page(new Page<>(page, size), queryWrapper);
         
-        // 查询当前用户已挂号的医生
-        List<DoctorRegistration> registrations = doctorRegistrationService.getUserRegistrations(loginUser.getId());
+        // 查询当前用户所有挂号的医生，活跃的排在前面
+        List<DoctorRegistration> registrations = doctorRegistrationService.getAllUserRegistrationsPrioritizeActive(loginUser.getId());
         Map<Integer, DoctorRegistration> registrationMap = registrations.stream()
-                .collect(Collectors.toMap(DoctorRegistration::getDoctorId, registration -> registration));
+                .collect(Collectors.toMap(DoctorRegistration::getDoctorId, registration -> registration, (r1, r2) -> r1));
+        
+        // 创建一个Map来存储医生ID与其挂号状态
+        Map<Integer, Integer> doctorRegistrationStatus = new HashMap<>();
         
         // 标记当前用户已挂号的医生
         for (User doctor : pageData.getRecords()) {
-            doctor.setIsRegistered(registrationMap.containsKey(doctor.getId()));
+            DoctorRegistration reg = registrationMap.get(doctor.getId());
+            if (reg != null) {
+                doctor.setIsRegistered(reg.getStatus() == 0); // 只将活跃的标记为已挂号
+                doctorRegistrationStatus.put(doctor.getId(), reg.getStatus());
+            } else {
+                doctor.setIsRegistered(false);
+            }
         }
         
         model.addAttribute("doctors", pageData.getRecords());
         model.addAttribute("doctorPage", pageData);
+        model.addAttribute("allRegistrations", registrations);
+        model.addAttribute("doctorRegistrationStatus", doctorRegistrationStatus);
         
         return "consultation";
     }
@@ -98,16 +109,13 @@ public class ConsultationController {
             return RespResult.fail("医生不存在或未通过审核");
         }
         
-        // 检查是否已经挂号
+        // 检查是否已经有活动的挂号
         if (doctorRegistrationService.isRegistered(loginUser.getId(), doctorId)) {
-            return RespResult.fail("您已经挂号该医生");
+            return RespResult.fail("您已经挂号该医生，可以直接进行问诊");
         }
         
-        // 记录挂号信息
-        DoctorRegistration registration = new DoctorRegistration();
-        registration.setUserId(loginUser.getId());
-        registration.setDoctorId(doctorId);
-        boolean success = doctorRegistrationService.save(registration);
+        // 尝试重新激活或创建挂号记录
+        boolean success = doctorRegistrationService.reactivateOrCreateRegistration(loginUser.getId(), doctorId);
         
         if (success) {
             return RespResult.success("挂号成功");
@@ -128,9 +136,12 @@ public class ConsultationController {
             return "redirect:/login";
         }
         
-        // 检查是否已挂号或挂号是否有效
-        if (!doctorRegistrationService.isRegistered(loginUser.getId(), doctorId)) {
-            model.addAttribute("message", "您的挂号已过期或尚未挂号，请重新挂号");
+        // 获取挂号记录
+        DoctorRegistration registration = doctorRegistrationService.getRegistrationRecord(loginUser.getId(), doctorId);
+        
+        // 检查是否已挂号
+        if (registration == null) {
+            model.addAttribute("message", "您尚未挂号该医生，请先挂号");
             return "redirect:/consultation";
         }
         
@@ -138,6 +149,11 @@ public class ConsultationController {
         User doctor = userService.getById(doctorId);
         model.addAttribute("doctor", doctor);
         model.addAttribute("user", loginUser);
+        model.addAttribute("consultationStatus", registration.getStatus());
+        
+        // 获取所有聊天记录
+        List<ChatMessage> messages = chatMessageService.getAllMessages(loginUser.getId(), doctorId);
+        model.addAttribute("messages", messages);
         
         return "doctor-chat";
     }
@@ -154,9 +170,15 @@ public class ConsultationController {
             return RespResult.fail("请先登录");
         }
         
-        // 检查是否已挂号
-        if (!doctorRegistrationService.isRegistered(loginUser.getId(), doctorId)) {
+        // 检查挂号状态
+        DoctorRegistration registration = doctorRegistrationService.getRegistrationRecord(loginUser.getId(), doctorId);
+        if (registration == null) {
             return RespResult.fail("您尚未挂号该医生");
+        }
+        
+        // 检查问诊是否已结束
+        if (registration.getStatus() == 1) {
+            return RespResult.fail("问诊已结束，无法发送消息");
         }
         
         // 创建新消息

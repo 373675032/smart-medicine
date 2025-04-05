@@ -32,4 +32,9 @@ public class DoctorRegistration {
      * 挂号时间
      */
     private Date createTime = new Date();
+    
+    /**
+     * 问诊状态：0-进行中，1-已结束
+     */
+    private Integer status = 0;
 } 

@@ -177,6 +177,23 @@
             font-size: 10px;
             margin-right: 4px;
         }
+        
+        .chat-header .ml-auto {
+            margin-left: auto;
+        }
+        
+        .consultation-ended-label {
+            color: #52c41a;
+            font-weight: 500;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background-color: rgba(82, 196, 26, 0.1);
+        }
+        
+        textarea:disabled, button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -213,7 +230,16 @@
                             </div>
                             <div>
                                 <h4 class="doctor-name" th:text="${doctor.userName}">医生姓名</h4>
-                                <span class="doctor-info">全科医生 <span class="online-status"><i class="fa fa-circle"></i> 在线</span></span>
+                                <span class="doctor-info">全科医生 
+                                    <span th:if="${consultationStatus == 0}" class="online-status">
+                                        <i class="fa fa-circle"></i> 在线
+                                    </span>
+                                </span>
+                            </div>
+                            <div class="ml-auto" th:if="${consultationStatus == 1}">
+                                <span class="consultation-ended-label">
+                                    <i class="fa fa-check-circle"></i> 问诊已结束
+                                </span>
                             </div>
                         </div>
                         
@@ -237,9 +263,9 @@
                         
                         <!-- 消息输入区域 -->
                         <div class="message-input-container">
-                            <textarea id="messageInput" placeholder="输入要咨询的内容..."></textarea>
+                            <textarea id="messageInput" placeholder="输入要咨询的内容..." th:disabled="${consultationStatus == 1}"></textarea>
                             <div class="message-actions">
-                                <button id="sendButton" class="send-btn">
+                                <button id="sendButton" class="send-btn" th:disabled="${consultationStatus == 1}">
                                     <i class="fa fa-paper-plane"></i> 发送
                                 </button>
                             </div>
@@ -277,19 +303,27 @@
     var doctorImgPath = $('#doctorImgPath').val();
     var userImgPath = $('#userImgPath').val();
     var lastMessageId = 0; // 跟踪最后一条消息的ID
+    var consultationStatus = /*[[${consultationStatus}]]*/ 0; // 问诊状态
     
     $(document).ready(function() {
+        // 初始化聊天记录
+        loadHistoricalMessages();
+        
         // 初始化滚动到底部
         scrollToBottom();
         
         // 绑定发送按钮事件
         $("#sendButton").click(function() {
-            sendMessage();
+            if (consultationStatus === 0) {
+                sendMessage();
+            } else {
+                layer.msg('问诊已结束，无法发送消息', {icon: 2});
+            }
         });
         
         // 绑定回车键发送消息
         $("#messageInput").keydown(function(event) {
-            if (event.keyCode === 13 && !event.shiftKey) {
+            if (event.keyCode === 13 && !event.shiftKey && consultationStatus === 0) {
                 event.preventDefault();
                 sendMessage();
             }
@@ -298,9 +332,27 @@
         // 立即检查一次消息
         checkNewMessages();
         
-        // 定期检查新消息
-        setInterval(checkNewMessages, 5000);
+        // 如果问诊未结束，定期检查新消息
+        if (consultationStatus === 0) {
+            // 定期检查新消息
+            window.messageCheckInterval = setInterval(checkNewMessages, 5000);
+        }
     });
+    
+    // 加载历史聊天记录
+    function loadHistoricalMessages() {
+        var messages = /*[[${messages}]]*/ [];
+        if (messages && messages.length > 0) {
+            messages.forEach(function(msg) {
+                addMessage(msg.content, msg.fromDoctor);
+                
+                // 更新最后一条消息ID
+                if (msg.id > lastMessageId) {
+                    lastMessageId = msg.id;
+                }
+            });
+        }
+    }
     
     // 滚动到底部
     function scrollToBottom() {
@@ -314,6 +366,12 @@
     function sendMessage() {
         var content = $("#messageInput").val().trim();
         if (!content) {
+            return;
+        }
+        
+        // 检查问诊是否已结束
+        if (consultationStatus === 1) {
+            layer.msg('问诊已结束，无法发送消息', {icon: 2});
             return;
         }
         
@@ -342,6 +400,10 @@
                     // 触发检查新消息
                     setTimeout(checkNewMessages, 1000);
                 } else {
+                    // 如果服务器返回问诊已结束，更新UI状态
+                    if (response.message && response.message.includes('问诊已结束')) {
+                        updateUIForEndedConsultation();
+                    }
                     layer.msg(response.message || '消息发送失败', {icon: 2});
                 }
             },
@@ -410,11 +472,38 @@
                             if (msg.id > lastMessageId) {
                                 lastMessageId = msg.id;
                             }
+                            
+                            // 检查是否有问诊结束的系统消息
+                            if (msg.fromDoctor && msg.content.includes('医生已结束本次问诊')) {
+                                updateUIForEndedConsultation();
+                            }
                         });
                     }
                 }
             }
         });
+    }
+    
+    // 更新UI以显示问诊已结束
+    function updateUIForEndedConsultation() {
+        // 更新全局状态
+        consultationStatus = 1;
+        
+        // 显示问诊已结束标签
+        if ($('.consultation-ended-label').length === 0) {
+            var endedLabel = '<span class="consultation-ended-label"><i class="fa fa-check-circle"></i> 问诊已结束</span>';
+            $(".chat-header").append('<div class="ml-auto">' + endedLabel + '</div>');
+            
+            // 移除在线状态
+            $(".online-status").hide();
+        }
+        
+        // 禁用输入框和发送按钮
+        $("#messageInput").prop('disabled', true);
+        $("#sendButton").prop('disabled', true);
+        
+        // 停止轮询新消息
+        clearInterval(window.messageCheckInterval);
     }
     
     // 格式化时间

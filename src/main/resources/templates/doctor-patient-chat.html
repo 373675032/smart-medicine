@@ -127,6 +127,20 @@
             display: block;
         }
         
+        .patient-info .status-active {
+            color: #2ecc71;
+            font-size: 11px;
+            display: block;
+            margin-top: 2px;
+        }
+        
+        .patient-info .status-ended {
+            color: #95a5a6;
+            font-size: 11px;
+            display: block;
+            margin-top: 2px;
+        }
+        
         /* 聊天区域样式 */
         .chat-container {
             flex-grow: 1;
@@ -154,6 +168,30 @@
         .chat-header .patient-info {
             margin-left: 10px;
             color: #666;
+        }
+        
+        .chat-header .ml-auto {
+            margin-left: auto;
+        }
+        
+        #endConsultationButton {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        #endConsultationButton:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+        
+        .consultation-ended-label {
+            color: #52c41a;
+            font-weight: 500;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background-color: rgba(82, 196, 26, 0.1);
         }
         
         .message-container {
@@ -251,6 +289,11 @@
             background-color: #40a9ff;
         }
         
+        textarea:disabled, button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
         @media (max-width: 992px) {
             .dashboard-content {
                 flex-direction: column;
@@ -312,6 +355,8 @@
                                     <div class="patient-info">
                                         <h6 th:text="${p.userName}">患者姓名</h6>
                                         <span class="patient-meta" th:text="${p.userSex + ' / ' + p.userAge + '岁'}">性别/年龄</span>
+                                        <span th:if="${registrationStatus != null && registrationStatus.get(p.id) == 1}" class="status-ended">已结束</span>
+                                        <span th:if="${registrationStatus != null && registrationStatus.get(p.id) == 0}" class="status-active">进行中</span>
                                     </div>
                                 </a>
                             </div>
@@ -334,6 +379,14 @@
                             <div>
                                 <h4 class="patient-name" th:text="${patient.userName}">患者姓名</h4>
                                 <span class="patient-info" th:text="${patient.userSex + ' / ' + patient.userAge + '岁'}">性别/年龄</span>
+                            </div>
+                            <div class="ml-auto">
+                                <span th:if="${consultationStatus == 1}" class="consultation-ended-label">
+                                    <i class="fa fa-check-circle"></i> 问诊已结束
+                                </span>
+                                <button th:if="${consultationStatus == 0}" id="endConsultationButton" class="btn btn-danger btn-sm">
+                                    结束问诊
+                                </button>
                             </div>
                         </div>
                         
@@ -379,9 +432,9 @@
                         
                         <!-- 消息输入区域 -->
                         <div class="message-input-container">
-                            <textarea id="messageInput" placeholder="输入回复内容..."></textarea>
+                            <textarea id="messageInput" placeholder="输入回复内容..." th:disabled="${consultationStatus == 1}"></textarea>
                             <div class="message-actions">
-                                <button id="sendButton" class="send-btn">
+                                <button id="sendButton" class="send-btn" th:disabled="${consultationStatus == 1}">
                                     <i class="fa fa-paper-plane"></i> 发送
                                 </button>
                             </div>
@@ -416,6 +469,7 @@
     var doctorImgPath = /*[[${doctor != null && doctor.imgPath != null ? doctor.imgPath : '../assets/images/default.jpg'}]]*/ '../assets/images/default.jpg';
     var patientImgPath = /*[[${patient != null && patient.imgPath != null ? patient.imgPath : '../assets/images/default.jpg'}]]*/ '../assets/images/default.jpg';
     var lastMessageId = 0; // 跟踪最后一条消息的ID
+    var consultationStatus = /*[[${consultationStatus}]]*/ 0; // 问诊状态
     
     $(document).ready(function() {
         // 初始化滚动到底部
@@ -426,22 +480,36 @@
         
         // 绑定发送按钮事件
         $("#sendButton").click(function() {
-            sendMessage();
+            if (consultationStatus === 0) {
+                sendMessage();
+            } else {
+                layer.msg('问诊已结束，无法发送消息', {icon: 2});
+            }
         });
         
         // 绑定回车键发送消息
         $("#messageInput").keydown(function(event) {
-            if (event.keyCode === 13 && !event.shiftKey) {
+            if (event.keyCode === 13 && !event.shiftKey && consultationStatus === 0) {
                 event.preventDefault();
                 sendMessage();
+            }
+        });
+        
+        // 绑定结束问诊按钮事件
+        $("#endConsultationButton").click(function() {
+            if (consultationStatus === 0) {
+                endConsultation();
             }
         });
         
         // 立即检查一次消息
         checkNewMessages();
         
-        // 定期检查新消息 - 缩短检查间隔为3秒，提高实时性
-        setInterval(checkNewMessages, 3000);
+        // 如果问诊未结束，定期检查新消息
+        if (consultationStatus === 0) {
+            // 定期检查新消息 - 缩短检查间隔为3秒，提高实时性
+            window.messageCheckInterval = setInterval(checkNewMessages, 3000);
+        }
     });
     
     // 初始化最后消息ID
@@ -458,6 +526,74 @@
     function scrollToBottom() {
         var container = document.getElementById('messageContainer');
         container.scrollTop = container.scrollHeight;
+    }
+    
+    // 结束问诊
+    function endConsultation() {
+        layer.confirm('确定要结束与该患者的问诊吗？结束后双方将无法继续沟通，但可以查看历史记录。', {
+            btn: ['确定','取消']
+        }, function(){
+            $.ajax({
+                type: "POST",
+                url: "../end-consultation",
+                data: {
+                    patientId: patientId
+                },
+                dataType: "json",
+                success: function(response) {
+                    if (response.code === 'SUCCESS') {
+                        // 发送系统消息告知患者问诊已结束
+                        sendEndConsultationMessage();
+                        
+                        // 更新UI状态
+                        updateUIForEndedConsultation();
+                        
+                        // 显示成功提示
+                        layer.msg('问诊已结束', {icon: 1});
+                    } else {
+                        layer.msg(response.message || '结束问诊失败', {icon: 2});
+                    }
+                },
+                error: function() {
+                    layer.msg('服务器错误，请稍后重试', {icon: 2});
+                }
+            });
+        });
+    }
+    
+    // 更新UI以显示问诊已结束
+    function updateUIForEndedConsultation() {
+        // 更新全局状态
+        consultationStatus = 1;
+        
+        // 隐藏结束问诊按钮，显示问诊已结束标签
+        $("#endConsultationButton").hide();
+        var endedLabel = '<span class="consultation-ended-label"><i class="fa fa-check-circle"></i> 问诊已结束</span>';
+        $(".chat-header .ml-auto").html(endedLabel);
+        
+        // 禁用输入框和发送按钮
+        $("#messageInput").prop('disabled', true);
+        $("#sendButton").prop('disabled', true);
+        
+        // 停止轮询新消息
+        clearInterval(window.messageCheckInterval);
+    }
+    
+    // 发送结束问诊的系统消息
+    function sendEndConsultationMessage() {
+        var content = "医生已结束本次问诊。如需继续咨询，请重新挂号。谢谢！";
+        $.ajax({
+            type: "POST",
+            url: "../doctor-reply",
+            data: {
+                patientId: patientId,
+                content: content
+            },
+            dataType: "json"
+        });
+        
+        // 在界面上直接显示消息
+        addMessage(content, true);
     }
     
     // 发送消息
