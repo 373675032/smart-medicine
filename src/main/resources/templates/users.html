@@ -272,6 +272,10 @@
         .btn-reject {
             background-color: #e74a3b;
         }
+
+        .btn-delete {
+            background-color: #dc3545;
+        }
         
         /* 分页样式 */
         .pagination-box {
@@ -508,6 +512,15 @@
                                                        onclick="auditDoctor(this.getAttribute('data-userid'), 2)">
                                                     <i class="fa fa-times"></i>
                                                 </button>
+                                                <!-- 删除用户按钮 - 除了admin账户外都可删除 -->
+                                                <button th:if="${user.userAccount != 'admin'}"
+                                                        class="btn-icon btn-delete"
+                                                        title="删除用户"
+                                                        th:data-userid="${user.id}"
+                                                        th:data-username="${user.userName}"
+                                                        onclick="deleteUser(this.getAttribute('data-userid'), this.getAttribute('data-username'))">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -569,6 +582,37 @@
 <script src="common/custom.js"></script>
 
 <script>
+    /**
+     * 删除用户
+     */
+    function deleteUser(userId, userName) {
+        layer.confirm('确定要删除用户 "' + userName + '" 吗？此操作不可恢复!', {
+            btn: ['确定', '取消'],
+            skin: 'layui-layer-molv'
+        }, function () {
+            $.ajax({
+                type: "POST",
+                url: "user/deleteUser",
+                data: {
+                    userId: userId
+                },
+                dataType: "json",
+                success: function (data) {
+                    if (data.code === 'SUCCESS') {
+                        layer.msg('删除成功', {icon: 1});
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        layer.msg(data.message || '删除失败', {icon: 2});
+                    }
+                },
+                error: function () {
+                    layer.msg('服务器错误，请稍后再试', {icon: 2});
+                }
+            });
+        });
+    }
     /**
      * 审核医生账号
      */
