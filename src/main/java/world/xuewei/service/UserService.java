@@ -1,6 +1,8 @@
 package world.xuewei.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import world.xuewei.dao.UserDao;
@@ -62,5 +64,17 @@ public class UserService extends BaseService<User> {
     @Override
     public int delete(Serializable id) {
         return userDao.deleteById(id);
+    }
+
+    public IPage<User> page(Page<User> page, QueryWrapper<User> queryWrapper) {
+        return userDao.selectPage(page, queryWrapper);
+    }
+
+    public User getById(Integer userId) {
+        return userDao.selectById(userId);
+    }
+
+    public void updateById(User user) {
+        userDao.updateById(user);
     }
 }

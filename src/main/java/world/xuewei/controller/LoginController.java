@@ -1,6 +1,7 @@
 package world.xuewei.controller;
 
 import cn.hutool.core.util.StrUtil;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,19 +16,7 @@ import java.util.Map;
 
 /**
  * 登录控制器
- * <p>
- * ==========================================================================
- * 郑重说明：本项目免费开源！原创作者为：薛伟同学，严禁私自出售。
- * ==========================================================================
- * B站账号：薛伟同学
- * 微信公众号：薛伟同学
- * 作者博客：http://xuewei.world
- * ==========================================================================
- * 陆陆续续总会收到粉丝的提醒，总会有些人为了赚取利益倒卖我的开源项目。
- * 不乏有粉丝朋友出现钱付过去，那边只把代码发给他就跑路的，最后还是根据线索找到我。。
- * 希望各位朋友擦亮慧眼，谨防上当受骗！
- * ==========================================================================
- *
+
  * @author <a href="http://xuewei.world/about">XUEW</a>
  */
 @RestController
@@ -38,7 +27,7 @@ public class LoginController extends BaseController<User> {
      * 注册
      */
     @PostMapping("/register")
-    public RespResult register(User user, String code) {
+    public RespResult register(User user, String code, String doctorQualificationImages) {
         String email = user.getUserEmail();
         if (Assert.isEmpty(email)) {
             return RespResult.fail("邮箱不能为空");
@@ -62,10 +51,30 @@ public class LoginController extends BaseController<User> {
         if (Assert.notEmpty(query)) {
             return RespResult.fail("账户已被注册");
         }
-        user.setRoleStatus(0);
-        user.setImgPath("https://moti-cloud-v2.oss-cn-beijing.aliyuncs.com/Snipaste_2022-05-01_15-37-01.png");
+        // 如果是医生类型，检查资质图片
+        if (user.getUserType() == 1) {
+            if (StringUtils.isEmpty(doctorQualificationImages)) {
+                return RespResult.fail("请上传医生资质证明");
+            }
+            // 设置医生资质图片路径
+            user.setDoctorQualificationImages(doctorQualificationImages);
+            // 医生默认为待审核状态
+            user.setAuditStatus(0);
+        } else {
+            // 普通用户默认为已审核通过
+            user.setAuditStatus(1);
+        }
+        // 设置角色状态
+        user.setRoleStatus(0); // 普通用户
+        // 设置默认头像
+        user.setImgPath("/assets/images/default.jpg");
         user = userService.save(user);
         session.setAttribute("loginUser", user);
+        
+        // 如果是医生，提示需要等待审核
+        if (user.getUserType() == 1) {
+            return RespResult.success("注册成功，请等待管理员审核后方可登录", user);
+        }
         return RespResult.success("注册成功", user);
     }
 
@@ -76,7 +85,18 @@ public class LoginController extends BaseController<User> {
     public RespResult login(User user) {
         List<User> users = userService.query(user);
         if (Assert.notEmpty(users)) {
-            session.setAttribute("loginUser", users.get(0));
+            User loginUser = users.get(0);
+            
+            // 检查医生账号的审核状态
+            if (loginUser.getUserType() == 1) {
+                if (loginUser.getAuditStatus() == 0) {
+                    return RespResult.fail("您的医生账号正在审核中，请耐心等待或联系管理员");
+                } else if (loginUser.getAuditStatus() == 2) {
+                    return RespResult.fail("您的医生账号审核未通过，请联系管理员了解详情");
+                }
+            }
+            
+            session.setAttribute("loginUser", loginUser);
             return RespResult.success("登录成功");
         }
         if (Assert.isEmpty(userService.query(User.builder().userAccount(user.getUserAccount()).build()))) {

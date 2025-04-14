@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>急救指南管理</title>
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/simple-line-icons.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+    <style>
+        .main-content {
+            padding-top: 300px; /* 给顶部导航留出空间 */
+            padding-bottom: 50px;
+            min-height: calc(100vh - 400px); /* 确保内容区域足够高 */
+        }
+        .dashboard-content {
+            background: #fff;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .dashboard-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .dashboard-title h4 {
+            margin: 0;
+            font-size: 20px;
+            color: #333;
+        }
+        .table th {
+            background: #f8f9fa;
+            font-weight: 500;
+        }
+        .table td {
+            vertical-align: middle;
+        }
+        .btn-group .btn {
+            padding: 5px 10px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-group .btn i {
+            font-size: 14px;
+        }
+        .category-manager {
+            margin-bottom: 30px;
+        }
+        /* 去掉输入框的拉升条 */
+        textarea {
+            resize: none;
+        }
+        
+        .form-control {
+            resize: none;  /* 禁止拉伸 */
+        }
+        
+        /* 弹窗内的表单样式 */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: none;  /* 禁止拉伸 */
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .nav-tabs {
+            border-bottom: 2px solid #eee;
+        }
+        .nav-tabs .nav-link {
+            border: none;
+            color: #666;
+            padding: 12px 20px;
+            font-weight: 500;
+        }
+        .nav-tabs .nav-link.active {
+            color: #4263EB;
+            border-bottom: 2px solid #4263EB;
+            background: none;
+        }
+        .tab-content {
+            padding-top: 20px;
+        }
+        .nav-link {
+            padding: 12px 20px;
+            color: #666;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            text-decoration: none;
+        }
+        .nav-link:hover {
+            color: #4263EB;
+            text-decoration: none;
+        }
+        .nav-link.active {
+            color: #4263EB;
+            border-bottom: 2px solid #4263EB;
+        }
+        .btn-primary {
+            background-color: #4263EB;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #3451C6;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(66, 99, 235, 0.2);
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+        }
+
+        .icon-plus {
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 添加头部 -->
+    <div th:replace="common/common-bar::#header"></div>
+
+    <div class="main-content">
+        <div class="container">
+            <div class="dashboard-main">
+                <div class="row">
+                    <div class="col-lg-3 col-md-12">
+                        <div th:replace="common/common-bar::#dashboard-sidebar"></div>
+                    </div>
+                    <div class="col-lg-9 col-md-12">
+                        <div class="dashboard-content">
+                            <div class="d-flex border-bottom mb-4">
+                                <a href="#category-content" class="nav-link active" data-toggle="tab" onclick="switchTab('category')">
+                                    分类管理
+                                </a>
+                                <a href="#guide-content" class="nav-link" data-toggle="tab" onclick="switchTab('guide')">
+                                    指南管理
+                                </a>
+                            </div>
+
+                            <!-- Tab 内容 -->
+                            <div class="tab-content">
+                                <div id="category-content" class="tab-pane fade show active">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h4 class="mb-0">分类管理</h4>
+                                        <button class="btn btn-primary" onclick="showAddCategory()">添加分类</button>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>分类名称</th>
+                                                    <th>排序</th>
+                                                    <th>创建时间</th>
+                                                    <th>操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="category : ${categories}">
+                                                    <td th:text="${category.name}"></td>
+                                                    <td th:text="${category.sort}"></td>
+                                                    <td th:text="${#dates.format(category.createTime, 'yyyy-MM-dd')}"></td>
+                                                    <td>
+                                                        <div class="btn-group">
+                                                            <button class="btn btn-primary" th:onclick="'editCategory(' + ${category.id} + ')'">编辑</button>
+                                                            <button class="btn btn-danger" th:onclick="'deleteCategory(' + ${category.id} + ')'">删除</button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!-- 分类列表分页 -->
+                                    <div class="pagination-wrapper mt-3" th:if="${categoryTotal > 0}">
+                                        <ul class="pagination justify-content-center">
+                                            <li class="page-item" th:class="${categoryCurrent == 1 ? 'disabled' : ''}">
+                                                <a class="page-link" th:href="@{/all-first-aid(page=1)}">首页</a>
+                                            </li>
+                                            <li class="page-item" th:class="${categoryCurrent == 1 ? 'disabled' : ''}">
+                                                <a class="page-link" th:href="@{/all-first-aid(page=${categoryCurrent - 1})}">上一页</a>
+                                            </li>
+                                            
+                                            <li class="page-item" th:each="i : ${#numbers.sequence(1, categoryPages)}" 
+                                                th:class="${categoryCurrent == i ? 'active' : ''}">
+                                                <a class="page-link" th:href="@{/all-first-aid(page=${i})}" th:text="${i}"></a>
+                                            </li>
+                                            
+                                            <li class="page-item" th:class="${categoryCurrent == categoryPages ? 'disabled' : ''}">
+                                                <a class="page-link" th:href="@{/all-first-aid(page=${categoryCurrent + 1})}">下一页</a>
+                                            </li>
+                                            <li class="page-item" th:class="${categoryCurrent == categoryPages ? 'disabled' : ''}">
+                                                <a class="page-link" th:href="@{/all-first-aid(page=${categoryPages})}">末页</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div id="guide-content" class="tab-pane fade">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <div class="d-flex align-items-center">
+                                            <h4 class="mb-0 me-3">指南管理</h4>
+                                            <select id="categoryFilter" class="form-select" onchange="loadGuidePage(1, this.value)">
+                                                <option value="">全部分类</option>
+                                                <option th:each="category : ${categories}" 
+                                                        th:value="${category.id}" 
+                                                        th:text="${category.name}">
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <a href="/add-first-aid" class="btn btn-primary">添加指南</a>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>标题</th>
+                                                    <th>分类</th>
+                                                    <th>排序</th>
+                                                    <th>创建时间</th>
+                                                    <th>操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="guide : ${list}">
+                                                    <td th:text="${guide.title}"></td>
+                                                    <td th:text="${guide.categoryName}"></td>
+                                                    <td th:text="${guide.sort}"></td>
+                                                    <td th:text="${#dates.format(guide.createTime, 'yyyy-MM-dd')}"></td>
+                                                    <td>
+                                                        <div class="btn-group">
+                                                            <a th:href="@{/add-first-aid(id=${guide.id})}" class="btn btn-primary">编辑</a>
+                                                            <button class="btn btn-danger" th:onclick="'deleteGuide(' + ${guide.id} + ')'">删除</button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!-- 指南列表分页 -->
+                                    <div class="pagination-wrapper mt-3" th:if="${guideTotal > 0}">
+                                        <ul class="pagination justify-content-center">
+                                            <li class="page-item" th:classappend="${guideCurrent == 1 ? 'disabled' : ''}">
+                                                <a class="page-link" href="javascript:void(0)" th:onclick="'loadGuidePage(' + ${guideCurrent - 1} + ', ' + ${categoryId} + ')'">上一页</a>
+                                            </li>
+                                            <li class="page-item" th:each="i : ${#numbers.sequence(1, guidePages)}"
+                                                th:classappend="${i == guideCurrent ? 'active' : ''}">
+                                                <a class="page-link" href="javascript:void(0)" th:onclick="'loadGuidePage(' + ${i} + ', ' + ${categoryId} + ')'" th:text="${i}"></a>
+                                            </li>
+                                            <li class="page-item" th:classappend="${guideCurrent == guidePages ? 'disabled' : ''}">
+                                                <a class="page-link" href="javascript:void(0)" th:onclick="'loadGuidePage(' + ${guideCurrent + 1} + ', ' + ${categoryId} + ')'">下一页</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加底部 -->
+    <div th:replace="common/common-bar::#footer"></div>
+
+    <!-- 添加分类的弹窗 -->
+    <div class="modal fade" id="addCategoryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">添加分类</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="categoryForm">
+                        <div class="mb-3">
+                            <label class="form-label">分类名称</label>
+                            <input type="text" class="form-control" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">排序</label>
+                            <input type="number" class="form-control" name="sort" value="0">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveCategory()">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/jquery-3.5.1.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="common/layer/layer.js"></script>
+    <script>
+        function showAddCategory() {
+            $('#addCategoryModal').modal('show');
+        }
+
+        function saveCategory() {
+            var formData = {
+                name: $('#categoryForm input[name="name"]').val(),
+                sort: $('#categoryForm input[name="sort"]').val()
+            };
+            
+            $.ajax({
+                url: '/first-aid/category/save',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function(res) {
+                    if(res.code === 'SUCCESS') {
+                        $('#addCategoryModal').modal('hide');
+                        loadCategoryPage(1); // 重新加载分类列表
+                    } else {
+                        alert('保存失败：' + res.message);
+                    }
+                }
+            });
+        }
+
+        function editCategory(id) {
+            const name = $(`tr[data-id="${id}"] td:first`).text();
+            const sort = $(`tr[data-id="${id}"] td:eq(1)`).text();
+            
+            layer.open({
+                type: 1,
+                title: '编辑分类',
+                area: ['400px', '250px'],  // 调整高度
+                content: `
+                    <div style="padding: 20px;">
+                        <div class="form-group">
+                            <label>分类名称</label>
+                            <input type="text" class="form-control" id="categoryName" value="${name}">
+                        </div>
+                        <div class="form-group">
+                            <label>排序</label>
+                            <input type="number" class="form-control" id="categorySort" value="${sort}" style="resize: none;">
+                        </div>
+                    </div>`,
+                btn: ['确定', '取消'],
+                yes: function(index) {
+                    saveCategory({
+                        id: id,
+                        name: $('#categoryName').val(),
+                        sort: $('#categorySort').val()
+                    });
+                    layer.close(index);
+                }
+            });
+        }
+
+        function deleteCategory(id) {
+            layer.confirm('确定要删除这个分类吗？', {
+                btn: ['确定', '取消']
+            }, function() {
+                $.post(`/first-aid/category/delete/${id}`, function(res) {
+                    if (res.code === 'SUCCESS') {
+                        layer.msg('删除成功');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        layer.msg(res.msg || '删除失败');
+                    }
+                });
+            });
+        }
+
+        function deleteGuide(id) {
+            layer.confirm('确定要删除这个指南吗？', {
+                btn: ['确定', '取消']
+            }, function() {
+                $.post(`/first-aid/delete/${id}`, function(res) {
+                    if (res.code === 'SUCCESS') {
+                        layer.msg('删除成功');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        layer.msg(res.msg || '删除失败');
+                    }
+                });
+            });
+        }
+
+        function switchTab(tab) {
+            // 移除所有 active 类
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('show', 'active');
+            });
+
+            // 添加 active 类到选中的 tab
+            if (tab === 'category') {
+                document.querySelector('a[href="#category-content"]').classList.add('active');
+                document.querySelector('#category-content').classList.add('show', 'active');
+            } else {
+                document.querySelector('a[href="#guide-content"]').classList.add('active');
+                document.querySelector('#guide-content').classList.add('show', 'active');
+            }
+        }
+
+        function loadGuidePage(page, categoryId) {
+       $.ajax({
+           url: '/first-aid/page',
+           type: 'GET',
+           data: {
+               pageNum: page,
+               pageSize: 10,
+               categoryId: categoryId || $('#categoryFilter').val()
+           },
+           success: function(res) {
+               // Update table content
+               var tbody = $('#guide-content table tbody');
+               tbody.empty();
+               res.list.forEach(function(guide) {
+                   var tr = `
+                       <tr>
+                           <td>${guide.title}</td>
+                           <td>${guide.categoryName}</td>
+                           <td>${guide.sort}</td>
+                           <td>${formatDate(guide.createTime)}</td>
+                           <td>
+                               <div class="btn-group">
+                                   <a href="/add-first-aid?id=${guide.id}" class="btn btn-primary">编辑</a>
+                                   <button class="btn btn-danger" onclick="deleteGuide(${guide.id})">删除</button>
+                               </div>
+                           </td>
+                       </tr>
+                   `;
+                   tbody.append(tr);
+               });
+               
+               // Update pagination component
+               var pagination = '';
+               if (res.total > 0) {
+                   pagination = `
+                       <ul class="pagination justify-content-center">
+                           <li class="page-item ${res.current == 1 ? 'disabled' : ''}">
+                               <a class="page-link" href="javascript:void(0)" onclick="loadGuidePage(${res.current - 1})">上一页</a>
+                           </li>
+                   `;
+                   
+                   for (var i = 1; i <= res.pages; i++) {
+                       pagination += `
+                           <li class="page-item ${i == res.current ? 'active' : ''}">
+                               <a class="page-link" href="javascript:void(0)" onclick="loadGuidePage(${i})">${i}</a>
+                           </li>
+                       `;
+                   }
+                   
+                   pagination += `
+                           <li class="page-item ${res.current == res.pages ? 'disabled' : ''}">
+                               <a class="page-link" href="javascript:void(0)" onclick="loadGuidePage(${res.current + 1})">下一页</a>
+                           </li>
+                       </ul>
+                   `;
+               }
+               $('.pagination-wrapper').html(pagination);
+           }
+       });
+   }
+
+        function loadCategoryPage(page) {
+            $.ajax({
+                url: '/first-aid/category/page',
+                type: 'GET',
+                data: {
+                    pageNum: page,
+                    pageSize: 10
+                },
+                success: function(res) {
+                    // 更新表格内容
+                    var tbody = $('#category-content table tbody');
+                    tbody.empty();
+                    res.list.forEach(function(category) {
+                        var tr = `
+                            <tr>
+                                <td>${category.name}</td>
+                                <td>${category.sort}</td>
+                                <td>${formatDate(category.createTime)}</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-primary" onclick="editCategory(${category.id})">编辑</button>
+                                        <button class="btn btn-danger" onclick="deleteCategory(${category.id})">删除</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        tbody.append(tr);
+                    });
+                    
+                    // 更新分页组件
+                    var pagination = '';
+                    if (res.total > 0) {
+                        pagination = `
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item ${res.current == 1 ? 'disabled' : ''}">
+                                    <a class="page-link" href="javascript:void(0)" onclick="loadCategoryPage(${res.current - 1})">上一页</a>
+                                </li>
+                        `;
+                        
+                        for (var i = 1; i <= res.pages; i++) {
+                            pagination += `
+                                <li class="page-item ${i == res.current ? 'active' : ''}">
+                                    <a class="page-link" href="javascript:void(0)" onclick="loadCategoryPage(${i})">${i}</a>
+                                </li>
+                            `;
+                        }
+                        
+                        pagination += `
+                                <li class="page-item ${res.current == res.pages ? 'disabled' : ''}">
+                                    <a class="page-link" href="javascript:void(0)" onclick="loadCategoryPage(${res.current + 1})">下一页</a>
+                                </li>
+                            </ul>
+                        `;
+                    }
+                    $('#category-content .pagination-wrapper').html(pagination);
+                }
+            });
+        }
+
+        // 页面加载完成后，加载第一页数据
+        $(document).ready(function() {
+            loadGuidePage(1);
+            loadCategoryPage(1);
+        });
+
+        // 日期格式化函数
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            var date = new Date(dateStr);
+            return date.getFullYear() + '-' + 
+                   String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                   String(date.getDate()).padStart(2, '0');
+        }
+    </script>
+</body>
+</html> 

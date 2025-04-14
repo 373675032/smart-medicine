@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zxx" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>添加健康科普</title>
+
+    <link rel="shortcut icon" type="image/x-icon" href="assets/images/cropped-favicon-32x32.png"/>
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/plugin.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/dashboard.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/fonts/flaticon.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/icons.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="assets/fonts/line-icons.css" type="text/css"/>
+    <link rel="stylesheet" href="common/font-awesome/css/font-awesome.min.css">
+    <!-- 引入 wangEditor 的样式 -->
+    <link href="https://unpkg.com/@wangeditor/editor@latest/dist/css/style.css" rel="stylesheet">
+    <style>
+        .dashboard-content {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 30px;
+        }
+        
+        .dashboard-title {
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+        
+        .dashboard-title h4 {
+            font-size: 20px;
+            color: #333;
+            margin: 0;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #4263EB;
+            box-shadow: 0 0 0 3px rgba(66,99,235,0.1);
+            outline: none;
+        }
+        
+        #editor-container {
+            margin-top: 10px;
+            border: 1px solid #e0e0e0 !important;
+            border-radius: 6px;
+            min-height: 400px;
+        }
+        
+        #toolbar-container {
+            border: 1px solid #e0e0e0 !important;
+            border-bottom: none !important;
+            border-radius: 6px 6px 0 0;
+        }
+        
+        .upload-btn-wrapper {
+            margin-top: 30px;
+        }
+        
+        .upload-btn-wrapper input[type=file] {
+            margin-bottom: 10px;
+        }
+        
+        .preview-image {
+            max-width: 200px;
+            border-radius: 6px;
+            margin-top: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .btn-submit {
+            background: #4263EB;
+            color: #fff;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+        
+        .btn-submit:hover {
+            background: #3451C6;
+        }
+        
+        .dashboard-list {
+            padding: 0 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="preloader">
+        <div id="status"></div>
+    </div>
+
+    <div th:replace="common/common-bar::#header"></div>
+
+    <div id="dashboard">
+        <div class="container">
+            <div class="dashboard-main">
+                <div class="row">
+                    <div class="col-lg-3 col-md-12">
+                        <div th:replace="common/common-bar::#dashboard-sidebar(cur='health-science')"></div>
+                    </div>
+                    <div class="col-lg-9 col-md-12">
+                        <div class="dashboard-content">
+                            <div class="dashboard-title">
+                                <h4 th:text="${news.id == null ? '添加健康科普' : '编辑健康科普'}"></h4>
+                            </div>
+                            <div class="dashboard-list">
+                                <form id="newsForm">
+                                    <input type="hidden" id="id" th:value="${news.id}"/>
+                                    
+                                    <div class="form-group">
+                                        <label>标题</label>
+                                        <input id="newsName" th:value="${news.newsName}" type="text" class="form-control" placeholder="请输入标题"/>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>关键词</label>
+                                        <input id="newsKey" type="text" th:value="${news.newsKey}" class="form-control" placeholder="请输入关键词"/>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>内容</label>
+                                        <div id="toolbar-container"></div>
+                                        <div id="editor-container"></div>
+                                        <textarea id="newsContent" style="display: none;" th:text="${news.newsContent}"></textarea>
+                                    </div>
+
+                                    <div class="form-group upload-btn-wrapper">
+                                        <label>封面图片</label>
+                                        <input type="file" id="imgFile" name="imgFile" accept="image/*" class="form-control"/>
+                                        <input type="hidden" id="imgPath" th:value="${news.imgPath}"/>
+                                        <img th:if="${news.imgPath != null}" th:src="${news.imgPath}" class="preview-image"/>
+                                    </div>
+
+                                    <div class="text-center">
+                                        <button type="button" onclick="saveNews()" class="btn-submit">保存</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="common/common-bar::#footer"></div>
+    
+    <div th:replace="common/common-bar::#search"></div>
+    
+    <div th:replace="common/common-bar::#back-to-top"></div>
+    
+    <!-- 添加必要的JavaScript文件 -->
+    <script src="assets/js/jquery-3.5.1.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/plugin.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/custom-swiper.js"></script>
+    <script src="assets/js/custom-nav.js"></script>
+    <script src="common/utils/reg.js"></script>
+    <script src="common/layer/layer.js"></script>
+    <script src="common/custom.js"></script>
+    <!-- 引入 wangEditor -->
+    <script src="https://unpkg.com/@wangeditor/editor@latest/dist/index.js"></script>
+    <script>
+        // 初始化编辑器
+        const { createEditor, createToolbar } = window.wangEditor;
+
+        const editorConfig = {
+            placeholder: '请输入内容...',
+            onChange(editor) {
+                const html = editor.getHtml();
+                document.getElementById('newsContent').value = html;
+            },
+            MENU_CONF: {
+                uploadImage: {
+                    server: '/medical_news/uploadImage',
+                    fieldName: 'file',
+                    maxFileSize: 10 * 1024 * 1024,
+                    maxNumberOfFiles: 10,
+                    allowedFileTypes: ['image/*'],
+                    // 自定义上传参数
+                    meta: {
+                        // 可以在这里添加其他参数
+                    },
+                    // 自定义请求头
+                    headers: {
+                        Accept: 'application/json',
+                        // 从 cookie 中获取 token
+                        'X-Token': getCookie('token') || ''
+                    },
+                    // 自定义结果处理
+                    customInsert(res, insertFn) {
+                        if (res.code === 'SUCCESS' && res.data) {
+                            insertFn(res.data);
+                        } else {
+                            console.log('图片上传失败', res);
+                            layer.msg(res.msg || '图片上传失败');
+                        }
+                    },
+                    // 上传失败
+                    onFailed(file, res) {
+                        console.log('上传失败', file, res);
+                        layer.msg('图片上传失败：' + (res.msg || '未知错误'));
+                    },
+                    // 上传错误
+                    onError(file, err, res) {
+                        console.log('上传错误', file, err, res);
+                        layer.msg('图片上传错误：' + (err.message || '未知错误'));
+                    }
+                }
+            }
+        };
+
+        // 添加获取 cookie 的辅助函数
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return '';
+        }
+
+        // 创建编辑器
+        const editor = createEditor({
+            selector: '#editor-container',
+            html: document.getElementById('newsContent').value,
+            config: editorConfig,
+            mode: 'default'
+        });
+
+        // 创建工具栏
+        const toolbar = createToolbar({
+            editor,
+            selector: '#toolbar-container',
+            config: {
+                excludeKeys: [] // 不排除任何功能键
+            }
+        });
+
+        // 添加保存方法
+        function saveNews() {
+            var id = $("#id").val();
+            var newsName = $("#newsName").val();
+            var newsKey = $("#newsKey").val();
+            var newsContent = $("#newsContent").val();
+          /*   var relationIllness = $("#relationIllness").val(); */
+            var imgPath = $("#imgPath").val();
+            
+            if (!newsName) {
+                layer.msg("请输入标题");
+                return;
+            }
+            if (!newsKey) {
+                layer.msg("请输入关键词");
+                return;
+            }
+            if (!newsContent) {
+                layer.msg("请输入内容");
+                return;
+            }
+            
+            var formData = new FormData();
+            formData.append("id", id);
+            formData.append("newsName", newsName);
+            formData.append("newsKey", newsKey);
+            formData.append("newsContent", newsContent);
+           /*  formData.append("relationIllness", relationIllness); */
+            formData.append("imgPath", imgPath);
+            
+            var imgFile = $("#imgFile")[0].files[0];
+            if (imgFile) {
+                formData.append("file", imgFile);
+            }
+            
+            $.ajax({
+                url: "/medical_news/saveNews",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(res) {
+                    if (res.code === 'SUCCESS') {
+                        layer.msg("保存成功");
+                        setTimeout(function() {
+                            window.location.href = "/all-health-science";
+                        }, 1500);
+                    } else {
+                        layer.msg(res.msg || "保存失败");
+                    }
+                },
+                error: function() {
+                    layer.msg("保存失败，请稍后重试");
+                }
+            });
+        }
+    </script>
+</body>
+</html> 

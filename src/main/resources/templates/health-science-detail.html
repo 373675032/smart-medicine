@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zxx" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>健康科普详情</title>
+
+    <link rel="shortcut icon" type="image/x-icon" href="assets/images/cropped-favicon-32x32.png"/>
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/plugin.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/dashboard.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/fonts/flaticon.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/icons.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="assets/fonts/line-icons.css" type="text/css"/>
+    <link rel="stylesheet" href="common/font-awesome/css/font-awesome.min.css">
+    <style>
+        /* 主要内容区域样式 */
+        .main-content {
+            padding-top: 300px; /* 给顶部导航留出空间 */
+            padding-bottom: 50px;
+            min-height: calc(100vh - 400px); /* 确保内容区域足够高 */
+        }
+        
+        /* 文章样式 */
+        .news-content {
+            line-height: 1.8;
+            font-size: 16px;
+        }
+        
+        .news-meta {
+            color: #666;
+            margin: 15px 0;
+        }
+
+        /* 确保内容不被导航栏遮挡 */
+        .header-top {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .main_header_area {
+            position: fixed;
+            top: 40px; /* header-top 的高度 */
+            left: 0;
+            right: 0;
+            z-index: 999;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* 页脚样式 */
+        .footer {
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="preloader">
+        <div id="status"></div>
+    </div>
+
+    <div th:replace="common/common-bar::#header"></div>
+
+    <!-- 添加 main-content 类 -->
+    <div class="main-content">
+        <div class="container">
+            <div class="card">
+                <div class="card-body">
+                    <!-- 文章标题 -->
+                    <h2 class="text-center mb-4" th:text="${news.newsName}">文章标题</h2>
+                    
+                    <!-- 文章元信息 -->
+                    <div class="news-meta text-center">
+                        <span class="mr-3">
+                            <i class="fa fa-calendar"></i>
+                            发布时间：<span th:text="${#dates.format(news.createTime, 'yyyy-MM-dd')}">发布时间</span>
+                        </span>
+                        <span th:if="${news.newsKey != null and news.newsKey != ''}">
+                            <i class="fa fa-tags"></i>
+                            关键词：<span th:text="${news.newsKey}">关键词</span>
+                        </span>
+                    </div>
+                    
+                    <!-- 文章内容 -->
+                    <div class="news-content mt-4" th:utext="${news.newsContent}">
+                        文章内容
+                    </div>
+
+                    <!-- 文章导航 -->
+                    <div class="article-nav">
+                        <style>
+                            .article-nav {
+                                margin-top: 40px;
+                                padding: 20px 0;
+                                border-top: 1px solid #eee;
+                                display: flex;
+                                justify-content: space-between;
+                            }
+                            
+                            .article-nav-item {
+                                flex: 0 0 48%;
+                                padding: 15px;
+                                background: #f8f9fa;
+                                border-radius: 4px;
+                                transition: all 0.3s ease;
+                            }
+                            
+                            .article-nav-item:hover {
+                                background: #e9ecef;
+                            }
+                            
+                            .article-nav-item a {
+                                display: flex;
+                                align-items: center;
+                                color: #333;
+                                text-decoration: none;
+                            }
+                            
+                            .article-nav-arrow {
+                                font-size: 20px;
+                                color: #666;
+                                margin: 0 10px;
+                            }
+                            
+                            .article-nav-content {
+                                flex: 1;
+                            }
+                            
+                            .article-nav-label {
+                                display: block;
+                                font-size: 12px;
+                                color: #999;
+                                margin-bottom: 5px;
+                            }
+                            
+                            .article-nav-title {
+                                font-size: 14px;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                                white-space: nowrap;
+                            }
+                            
+                            .article-nav-none {
+                                color: #999;
+                                text-align: center;
+                                padding: 15px;
+                            }
+                        </style>
+                        
+                        <div class="article-nav-item">
+                            <a th:if="${prev != null}" th:href="@{/health-science-detail(id=${prev.id})}">
+                                <span class="article-nav-arrow">←</span>
+                                <div class="article-nav-content">
+                                    <span class="article-nav-label">上一篇</span>
+                                    <div class="article-nav-title" th:text="${prev.newsName}">上一篇文章标题</div>
+                                </div>
+                            </a>
+                            <div class="article-nav-none" th:if="${prev == null}">
+                                <span class="article-nav-label">上一篇</span>
+                                <div>没有了</div>
+                            </div>
+                        </div>
+                        
+                        <div class="article-nav-item">
+                            <a th:if="${next != null}" th:href="@{/health-science-detail(id=${next.id})}">
+                                <div class="article-nav-content">
+                                    <span class="article-nav-label">下一篇</span>
+                                    <div class="article-nav-title" th:text="${next.newsName}">下一篇文章标题</div>
+                                </div>
+                                <span class="article-nav-arrow">→</span>
+                            </a>
+                            <div class="article-nav-none" th:if="${next == null}">
+                                <span class="article-nav-label">下一篇</span>
+                                <div>没有了</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="common/common-bar::#footer"></div>
+    <div th:replace="common/common-bar::#search"></div>
+    <div th:replace="common/common-bar::#back-to-top"></div>
+
+    <!-- JavaScript -->
+    <script src="assets/js/jquery-3.5.1.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/plugin.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/custom-swiper.js"></script>
+    <script src="assets/js/custom-nav.js"></script>
+    <script src="common/utils/reg.js"></script>
+    <script src="common/layer/layer.js"></script>
+    <script src="common/custom.js"></script>
+</body>
+</html> 

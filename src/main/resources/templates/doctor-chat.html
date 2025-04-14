@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zxx" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>在线问诊聊天 - 智慧医生</title>
+
+    <link rel="shortcut icon" type="image/x-icon" href="../assets/images/cropped-favicon-32x32.png"/>
+    <link href="../assets/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="../assets/css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="../assets/css/plugin.css" rel="stylesheet" type="text/css"/>
+    <link href="../assets/css/dashboard.css" rel="stylesheet" type="text/css"/>
+    <link href="../assets/fonts/flaticon.css" rel="stylesheet" type="text/css"/>
+    <link href="../assets/css/icons.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="../assets/fonts/line-icons.css" type="text/css"/>
+    <link rel="stylesheet" href="../common/font-awesome/css/font-awesome.min.css">
+    
+    <style>
+        /* 全局布局调整 */
+        .dashboard-content {
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 160px);
+            overflow: hidden;
+        }
+        
+        /* 聊天区域样式 */
+        .chat-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+        }
+        
+        .chat-header .doctor-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 10px;
+        }
+        
+        .chat-header .doctor-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .chat-header .doctor-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .chat-header .doctor-info {
+            margin-left: 10px;
+            color: #666;
+        }
+        
+        .message-container {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .message-row {
+            margin-bottom: 12px;
+            display: flex;
+        }
+        
+        .message-row.from-doctor {
+            justify-content: flex-start;
+        }
+        
+        .message-row.from-patient {
+            justify-content: flex-end;
+        }
+        
+        .message-bubble {
+            max-width: 70%;
+            padding: 8px 10px;
+            border-radius: 12px;
+            position: relative;
+        }
+        
+        .message-row.from-doctor .message-bubble {
+            background-color: #f1f0f0;
+            border-top-left-radius: 0;
+        }
+        
+        .message-row.from-patient .message-bubble {
+            background-color: #dcf8c6;
+            border-top-right-radius: 0;
+        }
+        
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin: 0 8px;
+        }
+        
+        .message-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .message-content {
+            word-wrap: break-word;
+            line-height: 1.4;
+            margin-bottom: 3px;
+            padding: 2px;
+        }
+        
+        .message-time {
+            font-size: 10px;
+            color: #999;
+            margin-top: 2px;
+            text-align: right;
+        }
+        
+        .message-input-container {
+            padding: 15px;
+            border-top: 1px solid #eee;
+            background-color: #f8f9fa;
+        }
+        
+        .message-input-container textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: none;
+            height: 80px;
+        }
+        
+        .message-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+        
+        .send-btn {
+            background-color: #1890ff;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .send-btn:hover {
+            background-color: #40a9ff;
+        }
+        
+        .online-status {
+            color: #2ecc71;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+        
+        .online-status i {
+            font-size: 10px;
+            margin-right: 4px;
+        }
+        
+        .chat-header .ml-auto {
+            margin-left: auto;
+        }
+        
+        .consultation-ended-label {
+            color: #52c41a;
+            font-weight: 500;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background-color: rgba(82, 196, 26, 0.1);
+        }
+        
+        textarea:disabled, button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+<div id="preloader">
+    <div id="status"></div>
+</div>
+
+<div th:replace="common/common-bar::#header"></div>
+
+<div class="dashboard-banner">
+    <div class="container">
+        <div class="dashboard-head text-center">
+            <h3>医生在线问诊</h3>
+            <p>与医生进行专业医疗咨询</p>
+        </div>
+    </div>
+</div>
+
+<div id="dashboard">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12">
+                <div th:replace="common/common-bar::#dashboard-sidebar(cur='consultation')"></div>
+            </div>
+            <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
+                <div class="dashboard-content">
+                    <!-- 聊天区域 -->
+                    <div class="chat-container">
+                        <!-- 聊天头部 -->
+                        <div class="chat-header">
+                            <div class="doctor-avatar">
+                                <img th:src="${doctor.imgPath != null ? doctor.imgPath : '../assets/images/team/user-2.jpg'}" alt="医生头像">
+                            </div>
+                            <div>
+                                <h4 class="doctor-name" th:text="${doctor.userName}">医生姓名</h4>
+                                <span class="doctor-info">全科医生 
+                                    <span th:if="${consultationStatus == 0}" class="online-status">
+                                        <i class="fa fa-circle"></i> 在线
+                                    </span>
+                                </span>
+                            </div>
+                            <div class="ml-auto" th:if="${consultationStatus == 1}">
+                                <span class="consultation-ended-label">
+                                    <i class="fa fa-check-circle"></i> 问诊已结束
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- 消息容器 -->
+                        <div id="messageContainer" class="message-container">
+                            <!-- 欢迎消息 -->
+                            <div class="message-row from-doctor">
+                                <div class="message-avatar">
+                                    <img th:src="${doctor.imgPath != null ? doctor.imgPath : '../assets/images/team/user-2.jpg'}" alt="医生头像">
+                                </div>
+                                <div class="message-bubble">
+                                    <div class="message-content">
+                                        [[${user.userName}]]您好，我是[[${doctor.userName}]]，请问有什么健康问题需要咨询？
+                                    </div>
+                                    <div class="message-time">现在</div>
+                                </div>
+                            </div>
+                            
+                            <!-- 历史消息将通过AJAX加载 -->
+                        </div>
+                        
+                        <!-- 消息输入区域 -->
+                        <div class="message-input-container">
+                            <textarea id="messageInput" placeholder="输入要咨询的内容..." th:disabled="${consultationStatus == 1}"></textarea>
+                            <div class="message-actions">
+                                <button id="sendButton" class="send-btn" th:disabled="${consultationStatus == 1}">
+                                    <i class="fa fa-paper-plane"></i> 发送
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="common/common-bar::#back"></div>
+<div th:replace="common/common-bar::#footer"></div>
+<div th:replace="common/common-bar::#search"></div>
+<div th:replace="common/common-bar::#back-to-top"></div>
+
+<!-- 隐藏字段存储图片路径 -->
+<input type="hidden" id="doctorImgPath" th:value="${doctor.imgPath != null ? doctor.imgPath : '../assets/images/team/user-2.jpg'}" />
+<input type="hidden" id="userImgPath" th:value="${user.imgPath != null ? user.imgPath : '../assets/images/team/user-1.jpg'}" />
+
+<script src="../assets/js/jquery-3.5.1.min.js"></script>
+<script src="../assets/js/bootstrap.min.js"></script>
+<script src="../assets/js/plugin.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/custom-nav.js"></script>
+<script src="../assets/js/jpanelmenu.min.js"></script>
+<script src="../assets/js/dashboard-custom.js"></script>
+<script src="../common/utils/reg.js"></script>
+<script src="../common/layer/layer.js"></script>
+<script src="../common/custom.js"></script>
+
+<script th:inline="javascript">
+    // 获取Thymeleaf变量和URL参数
+    var doctorId = getQueryParam('doctorId');
+    var doctorImgPath = $('#doctorImgPath').val();
+    var userImgPath = $('#userImgPath').val();
+    var lastMessageId = 0; // 跟踪最后一条消息的ID
+    var consultationStatus = /*[[${consultationStatus}]]*/ 0; // 问诊状态
+    
+    $(document).ready(function() {
+        // 初始化聊天记录
+        loadHistoricalMessages();
+        
+        // 初始化滚动到底部
+        scrollToBottom();
+        
+        // 绑定发送按钮事件
+        $("#sendButton").click(function() {
+            if (consultationStatus === 0) {
+                sendMessage();
+            } else {
+                layer.msg('问诊已结束，无法发送消息', {icon: 2});
+            }
+        });
+        
+        // 绑定回车键发送消息
+        $("#messageInput").keydown(function(event) {
+            if (event.keyCode === 13 && !event.shiftKey && consultationStatus === 0) {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        // 立即检查一次消息
+        checkNewMessages();
+        
+        // 如果问诊未结束，定期检查新消息
+        if (consultationStatus === 0) {
+            // 定期检查新消息
+            window.messageCheckInterval = setInterval(checkNewMessages, 5000);
+        }
+    });
+    
+    // 加载历史聊天记录
+    function loadHistoricalMessages() {
+        var messages = /*[[${messages}]]*/ [];
+        if (messages && messages.length > 0) {
+            messages.forEach(function(msg) {
+                addMessage(msg.content, msg.fromDoctor);
+                
+                // 更新最后一条消息ID
+                if (msg.id > lastMessageId) {
+                    lastMessageId = msg.id;
+                }
+            });
+        }
+    }
+    
+    // 滚动到底部
+    function scrollToBottom() {
+        var container = document.getElementById('messageContainer');
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
+    }
+    
+    // 发送消息
+    function sendMessage() {
+        var content = $("#messageInput").val().trim();
+        if (!content) {
+            return;
+        }
+        
+        // 检查问诊是否已结束
+        if (consultationStatus === 1) {
+            layer.msg('问诊已结束，无法发送消息', {icon: 2});
+            return;
+        }
+        
+        // 清空输入框
+        $("#messageInput").val("");
+        
+        // 立即在界面上显示自己发送的消息
+        addMessage(content, false); // false表示患者发送的消息
+        
+        // 发送消息到服务器
+        $.ajax({
+            type: "POST",
+            url: "/consultation-send",
+            data: {
+                doctorId: doctorId,
+                content: content
+            },
+            dataType: "json",
+            success: function(response) {
+                if (response.code === 'SUCCESS') {
+                    // 消息已成功发送到服务器
+                    if (response.data && response.data.messageId) {
+                        lastMessageId = response.data.messageId;
+                    }
+                    
+                    // 触发检查新消息
+                    setTimeout(checkNewMessages, 1000);
+                } else {
+                    // 如果服务器返回问诊已结束，更新UI状态
+                    if (response.message && response.message.includes('问诊已结束')) {
+                        updateUIForEndedConsultation();
+                    }
+                    layer.msg(response.message || '消息发送失败', {icon: 2});
+                }
+            },
+            error: function() {
+                layer.msg('服务器错误，请稍后重试', {icon: 2});
+            }
+        });
+    }
+    
+    // 添加消息到聊天区域
+    function addMessage(content, isFromDoctor) {
+        var now = new Date();
+        var timeString = formatTime(now);
+        
+        var messageHtml = '';
+        if (isFromDoctor) {
+            // 医生发来的消息
+            messageHtml = 
+                '<div class="message-row from-doctor">' +
+                '    <div class="message-avatar">' +
+                '        <img src="' + doctorImgPath + '" alt="医生头像">' +
+                '    </div>' +
+                '    <div class="message-bubble">' +
+                '        <div class="message-content">' + escapeHtml(content) + '</div>' +
+                '        <div class="message-time">' + timeString + '</div>' +
+                '    </div>' +
+                '</div>';
+        } else {
+            // 患者自己发送的消息
+            messageHtml = 
+                '<div class="message-row from-patient">' +
+                '    <div class="message-bubble">' +
+                '        <div class="message-content">' + escapeHtml(content) + '</div>' +
+                '        <div class="message-time">' + timeString + '</div>' +
+                '    </div>' +
+                '    <div class="message-avatar">' +
+                '        <img src="' + userImgPath + '" alt="我的头像">' +
+                '    </div>' +
+                '</div>';
+        }
+        
+        $("#messageContainer").append(messageHtml);
+        scrollToBottom();
+    }
+    
+    // 检查是否有新消息
+    function checkNewMessages() {
+        $.ajax({
+            type: "GET",
+            url: "/consultation-messages",
+            data: {
+                doctorId: doctorId,
+                lastMessageId: lastMessageId
+            },
+            dataType: "json",
+            success: function(response) {
+                if (response.code === 'SUCCESS' && response.data && response.data.messages) {
+                    var newMessages = response.data.messages;
+                    
+                    if (newMessages.length > 0) {
+                        // 显示新消息
+                        newMessages.forEach(function(msg) {
+                            addMessage(msg.content, msg.fromDoctor);
+                            
+                            // 更新最后消息ID
+                            if (msg.id > lastMessageId) {
+                                lastMessageId = msg.id;
+                            }
+                            
+                            // 检查是否有问诊结束的系统消息
+                            if (msg.fromDoctor && msg.content.includes('医生已结束本次问诊')) {
+                                updateUIForEndedConsultation();
+                            }
+                        });
+                    }
+                }
+            }
+        });
+    }
+    
+    // 更新UI以显示问诊已结束
+    function updateUIForEndedConsultation() {
+        // 更新全局状态
+        consultationStatus = 1;
+        
+        // 显示问诊已结束标签
+        if ($('.consultation-ended-label').length === 0) {
+            var endedLabel = '<span class="consultation-ended-label"><i class="fa fa-check-circle"></i> 问诊已结束</span>';
+            $(".chat-header").append('<div class="ml-auto">' + endedLabel + '</div>');
+            
+            // 移除在线状态
+            $(".online-status").hide();
+        }
+        
+        // 禁用输入框和发送按钮
+        $("#messageInput").prop('disabled', true);
+        $("#sendButton").prop('disabled', true);
+        
+        // 停止轮询新消息
+        clearInterval(window.messageCheckInterval);
+    }
+    
+    // 格式化时间
+    function formatTime(date) {
+        var hours = date.getHours();
+        var minutes = date.getMinutes();
+        
+        hours = hours < 10 ? '0' + hours : hours;
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        
+        return hours + ':' + minutes;
+    }
+    
+    // 获取URL参数
+    function getQueryParam(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return decodeURIComponent(r[2]); 
+        return null;
+    }
+    
+    // HTML转义，防止XSS攻击
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+</script>
+
+</body>
+</html> 
